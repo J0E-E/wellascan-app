@@ -17,6 +17,27 @@ type BusyAction =
     | { type: 'upsert_busy_message', payload: { messageId: string; message: string } }
     | { type: 'delete_busy_message', payload: { messageId: string } }
 
+type StartBusyOptions = {
+    messages?: Record<string, string>
+}
+
+type StartTimedBusyOptions = {
+    messages?: Record<string, string>
+    minTime?: number
+}
+
+type StopBusyOptions = {
+    state: BusyState
+}
+
+type UpsertBusyOptions = {
+    messageId: string
+    message: string
+}
+
+type DeleteBusyOptions = {
+    messageId: string
+}
 
 const defaultBusyState: BusyState = {
     isActive: false,
@@ -34,7 +55,7 @@ const busyReducer = (state: BusyState, action: BusyAction): BusyState => {
                 ...state,
                 isActive: true,
                 isTimed: true,
-                ...(action.payload.minTime && {minTime: action.payload.minTime}),
+                minTime: action.payload.minTime ?? state.minTime,
                 messages: action.payload.messages,
                 startTime: Date.now()
             }
@@ -51,13 +72,16 @@ const busyReducer = (state: BusyState, action: BusyAction): BusyState => {
 }
 
 const busyActions = {
-    startBusy: (dispatch: Dispatch<BusyAction>) => (messages: Record<string, string>) => {
+    startBusy: (dispatch: Dispatch<BusyAction>) => (options: StartBusyOptions = {}) => {
+        const {messages = {}} = options
         dispatch({type: "start_busy", payload: {messages}})
     },
-    startTimedBusy: (dispatch: Dispatch<BusyAction>) => (messages: Record<string, string>, minTime?: number) => {
+    startTimedBusy: (dispatch: Dispatch<BusyAction>) => (options: StartTimedBusyOptions = {}) => {
+        const {messages = {}, minTime} = options
         dispatch({type: 'start_timed_busy', payload: {messages, minTime}})
     },
-    stopBusy: (dispatch: Dispatch<BusyAction>) => (state: BusyState) => {
+    stopBusy: (dispatch: Dispatch<BusyAction>) => (options: StopBusyOptions) => {
+        const {state} = options
         if (state.isTimed && state.startTime) {
             const elapsedTime = Date.now() - state.startTime
             const remainingTime = state.minTime - elapsedTime
@@ -71,10 +95,12 @@ const busyActions = {
         }
         dispatch({type: 'stop_busy'})
     },
-    upsertBusyMessage: (dispatch: Dispatch<BusyAction>) => (messageId: string, message: string) => {
+    upsertBusyMessage: (dispatch: Dispatch<BusyAction>) => (options: UpsertBusyOptions) => {
+        const {messageId, message} = options
         dispatch({type: "upsert_busy_message", payload: {messageId, message}})
     },
-    deleteBusyMessage: (dispatch: Dispatch<BusyAction>) => (messageId: string) => {
+    deleteBusyMessage: (dispatch: Dispatch<BusyAction>) => (options: DeleteBusyOptions) => {
+        const {messageId} = options
         dispatch({type: "delete_busy_message", payload: {messageId}})
     }
 }
