@@ -8,12 +8,7 @@ export const useBusy = () => {
         throw new Error('useBusy must be used within a BusyProvider')
     }
 
-    // pulling out state & stopBusy for returns.
-    const {state, stopBusy, ...rest} = context
-
     return {
-        ...rest,
-        state,
-        stopBusy: () => stopBusy(state) // passing state for timed busy applications.
+        ...context
     }
 }

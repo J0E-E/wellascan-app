@@ -26,11 +26,6 @@ type StartTimedBusyOptions = {
     minTime?: number
 }
 
-type StopBusyOptions = {
-    state: BusyState,
-    dispatchCallback?: () => void
-}
-
 type UpsertBusyOptions = {
     messageId: string
     message: string
@@ -94,7 +89,7 @@ const busyActions = {
         const {messages = {}, minTime} = options
         dispatch({type: 'start_timed_busy', payload: {messages, minTime}})
     },
-    stopBusy: (dispatch: Dispatch<BusyAction>) => (options: StopBusyOptions) => {
+    stopBusy: (dispatch: Dispatch<BusyAction>) => () => {
         dispatch({type: 'stop_busy', payload: {
                 dispatchCallback: () => dispatch({ type: 'stop_busy' })
             }})
