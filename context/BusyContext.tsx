@@ -13,7 +13,7 @@ type BusyState = {
 type BusyAction =
     | { type: 'start_busy', payload: { messages: Record<string, string> } }
     | { type: 'start_timed_busy', payload: { minTime?: number; messages: Record<string, string> } }
-    | { type: 'stop_busy' }
+    | { type: 'stop_busy', payload?: { dispatchCallback?: () => void } }
     | { type: 'upsert_busy_message', payload: { messageId: string; message: string } }
     | { type: 'delete_busy_message', payload: { messageId: string } }
 
@@ -27,7 +27,8 @@ type StartTimedBusyOptions = {
 }
 
 type StopBusyOptions = {
-    state: BusyState
+    state: BusyState,
+    dispatchCallback?: () => void
 }
 
 type UpsertBusyOptions = {
@@ -60,6 +61,19 @@ const busyReducer = (state: BusyState, action: BusyAction): BusyState => {
                 startTime: Date.now()
             }
         case 'stop_busy':
+            if (state.isTimed && state.startTime) {
+                const elapsedTime = Date.now() - state.startTime
+                const remainingTime = state.minTime - elapsedTime
+
+                if (remainingTime > 0) {
+                    if (action.payload?.dispatchCallback) {
+                        setTimeout(() => {
+                            action.payload!.dispatchCallback!()
+                        }, remainingTime)
+                    }
+                    return {...state}
+                }
+            }
             return {...defaultBusyState}
         case 'upsert_busy_message':
             return {...state, messages: {...state.messages, [action.payload.messageId]: action.payload.message}}
@@ -81,19 +95,9 @@ const busyActions = {
         dispatch({type: 'start_timed_busy', payload: {messages, minTime}})
     },
     stopBusy: (dispatch: Dispatch<BusyAction>) => (options: StopBusyOptions) => {
-        const {state} = options
-        if (state.isTimed && state.startTime) {
-            const elapsedTime = Date.now() - state.startTime
-            const remainingTime = state.minTime - elapsedTime
-
-            if (remainingTime > 0) {
-                setTimeout(() => {
-                    dispatch({type: "stop_busy"})
-                }, remainingTime)
-                return
-            }
-        }
-        dispatch({type: 'stop_busy'})
+        dispatch({type: 'stop_busy', payload: {
+                dispatchCallback: () => dispatch({ type: 'stop_busy' })
+            }})
     },
     upsertBusyMessage: (dispatch: Dispatch<BusyAction>) => (options: UpsertBusyOptions) => {
         const {messageId, message} = options
