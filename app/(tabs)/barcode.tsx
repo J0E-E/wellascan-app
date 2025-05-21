@@ -9,11 +9,13 @@ import {CameraView, useCameraPermissions} from "expo-camera";
 import {useEffect, useState} from "react";
 
 import wellaAPI from "@/api/wella";
+import {useBusy} from "@/hooks/useBusy";
 
 const scannerSound = require('../../assets/sounds/scanner-beep.mp3')
 
 
 export default function BarcodeScreen() {
+    const {startTimedBusy, stopBusy} = useBusy()
     const [barcode, setBarcode] = useState<string>('')
     const [product, setProduct] = useState<string>('')
     const [permission, requestPermission] = useCameraPermissions()
@@ -31,6 +33,7 @@ export default function BarcodeScreen() {
 
         const getUPCDetails = async () => {
             try {
+                startTimedBusy()
                 const response = await wellaAPI.get('searchByEan/', {
                     params: {
                         ean: barcode,
@@ -42,10 +45,14 @@ export default function BarcodeScreen() {
                 }
             } catch (error) {
                 console.log(error)
+            } finally {
+                stopBusy()
             }
 
         }
         getUPCDetails()
+    // no need to trigger on startTimedBusy or stopBusy.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [barcode]);
 
     if (!permission) {
@@ -95,7 +102,7 @@ export default function BarcodeScreen() {
                 <ThemedText type="subtitle">{"Use this to keep track of your Wella product reorder needs."}</ThemedText>
             </ThemedView>
             {
-                barcode
+                product
                     ? (<>
                             <ThemedText type="subtitle">{barcode}</ThemedText>
                             <ThemedText type="subtitle">{product}</ThemedText>
