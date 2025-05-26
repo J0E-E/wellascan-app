@@ -2,9 +2,23 @@
 const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
 
-module.exports = defineConfig([
-  expoConfig,
-  {
-    ignores: ['dist/*'],
+module.exports = {
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint', 'unused-imports'],
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'prettier',
+  ],
+  env: {
+    node: true,
+    es6: true,
   },
-]);
+  rules: {
+    'unused-imports/no-unused-imports': 'error',
+    'unused-imports/no-unused-vars': [
+      'warn',
+      { 'vars': 'all', 'varsIgnorePattern': '^_', 'args': 'after-used', 'argsIgnorePattern': '^_' },
+    ],
+  },
+}

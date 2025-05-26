@@ -38,7 +38,7 @@ type DeleteBusyOptions = {
 const defaultBusyState: BusyState = {
     isActive: false,
     isTimed: false,
-    minTime: 300,
+    minTime: 350,
     messages: {}
 }
 

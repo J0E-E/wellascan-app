@@ -51,8 +51,8 @@ export default function BarcodeScreen() {
 
         }
         getUPCDetails()
-    // no need to trigger on startTimedBusy or stopBusy.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // no need to trigger on startTimedBusy or stopBusy.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [barcode]);
 
     if (!permission) {
@@ -67,7 +67,7 @@ export default function BarcodeScreen() {
             headerImage={
                 <Image
                     source={require('@/assets/images/wella.png')}
-                    style={styles.reactLogo}
+                    style={styles.wellaLogo}
                 />
             }>
             <ThemedView style={styles.titleContainer}>
@@ -92,7 +92,7 @@ export default function BarcodeScreen() {
             headerImage={
                 <Image
                     source={require('@/assets/images/wella.png')}
-                    style={styles.reactLogo}
+                    style={styles.wellaLogo}
                 />
             }>
             <ThemedView style={styles.titleContainer}>
@@ -102,7 +102,7 @@ export default function BarcodeScreen() {
                 <ThemedText type="subtitle">{"Use this to keep track of your Wella product reorder needs."}</ThemedText>
             </ThemedView>
             {
-                product
+                barcode
                     ? (<>
                             <ThemedText type="subtitle">{barcode}</ThemedText>
                             <ThemedText type="subtitle">{product}</ThemedText>
@@ -113,18 +113,26 @@ export default function BarcodeScreen() {
                         </>
                     )
                     : (
-                        <CameraView
-                            style={styles.camera}
-                            facing={'back'}
-                            autofocus={'on'}
-                            barcodeScannerSettings={{
-                                barcodeTypes: ["upc_a"]
-                            }}
-                            onBarcodeScanned={(scanningResult) => {
-                                scannerSoundPlayer.play()
-                                setBarcode(scanningResult.data)
-                            }}
-                        />
+                        <>
+                            <Button
+                                title={"Simulate Barcode Scan"}
+                                onPress={() => {
+                                    setBarcode("4064666230160")
+                                }}
+                            />
+                            <CameraView
+                                style={styles.camera}
+                                facing={'back'}
+                                autofocus={'on'}
+                                barcodeScannerSettings={{
+                                    barcodeTypes: ["upc_a"]
+                                }}
+                                onBarcodeScanned={(scanningResult) => {
+                                    scannerSoundPlayer.play()
+                                    setBarcode(scanningResult.data)
+                                }}
+                            />
+                        </>
                     )
             }
         </ParallaxScrollView>
@@ -132,7 +140,7 @@ export default function BarcodeScreen() {
 }
 
 const styles = StyleSheet.create({
-    reactLogo: {
+    wellaLogo: {
         height: 178,
         width: "100%",
         bottom: 0,
