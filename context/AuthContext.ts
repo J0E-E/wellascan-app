@@ -1,7 +1,7 @@
 import contextFactory from '@/context/contextFactory'
 import { Dispatch } from 'react'
 
-type AuthState = {
+export type AuthState = {
 	token: string
 	refreshtoken: string
 }
@@ -23,8 +23,6 @@ const defaultState: AuthState = {
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 	switch (action.type) {
 		case 'set_auth':
-			console.log('setting auth')
-			console.log(action.payload)
 			return { token: action.payload.token, refreshtoken: action.payload.refreshToken}
 		case 'unset_auth':
 		default:

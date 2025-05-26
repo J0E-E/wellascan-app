@@ -10,6 +10,7 @@ import {useEffect, useState} from "react";
 
 import wellaAPI from "@/api/wella";
 import {useBusy} from "@/hooks/useBusy";
+import globalStyles from '@/styles/global'
 
 const scannerSound = require('../../assets/sounds/scanner-beep.mp3')
 
@@ -140,13 +141,7 @@ export default function BarcodeScreen() {
 }
 
 const styles = StyleSheet.create({
-    wellaLogo: {
-        height: 178,
-        width: "100%",
-        bottom: 0,
-        left: 0,
-        position: 'absolute',
-    },
+    ...globalStyles,
     titleContainer: {
         flexDirection: 'row',
         alignItems: 'center',

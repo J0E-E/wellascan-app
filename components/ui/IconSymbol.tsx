@@ -18,7 +18,8 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
-  'barcode.viewfinder': 'barcode-reader'
+  'barcode.viewfinder': 'barcode-reader',
+  'x.circle': 'logout',
 } as IconMapping;
 
 /**

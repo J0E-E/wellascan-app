@@ -12,6 +12,7 @@ import Spacer from '@/components/ui/Spacer'
 import { signUp, signIn, getAPIErrorMessage } from '@/api/db'
 import { useBusy } from '@/hooks/useBusy'
 import ErrorText from '@/components/ui/ErrorText'
+import globalStyles from '@/styles/global'
 
 export default function LoginScreen() {
 	const { startTimedBusy, stopBusy } = useBusy()
@@ -114,6 +115,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+	...globalStyles,
 	titleContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
@@ -122,13 +124,6 @@ const styles = StyleSheet.create({
 	stepContainer: {
 		gap: 8,
 		marginBottom: 8,
-	},
-	wellaLogo: {
-		height: 178,
-		width: '100%',
-		bottom: 0,
-		left: 0,
-		position: 'absolute',
 	},
 	inputStyle: {
 		color: '#ffffff',
