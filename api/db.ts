@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios'
 import { AuthState } from '@/context/AuthContext'
 
 const dbAPI = axios.create({
-	baseURL: 'https://2b33-2603-9000-d801-849b-f1a0-67ce-a3ff-42cd.ngrok-free.app',
+	baseURL: 'https://feb1-2603-9000-d801-849b-7993-adb9-1043-50f2.ngrok-free.app',
 })
 
 type AuthOptions = {
@@ -10,21 +10,32 @@ type AuthOptions = {
 	password: string
 }
 
-type ListOptions = {
-	auth: AuthState
-	id?: string
+const setAuthHeader = (options: { auth: AuthState }) => {
+	return { 'Authorization': 'Bearer ' + options.auth.token }
 }
 
 export const signUp = async (options: AuthOptions) => await dbAPI.post('auth/signup', { ...options })
 
 export const signIn = async (options: AuthOptions) => await dbAPI.post('auth/signin', { ...options })
 
-export const getLists = async (options: ListOptions) => await dbAPI.get(
+export const getLists = async (options: { id?: string, auth: AuthState }) => await dbAPI.get(
 	'reorder/list/',
 	{
-		params: options.id ? options.id : null,
-		headers: { 'Authorization': 'Bearer ' + options.auth.token },
+		params: options.id ? { id: options.id } : {},
+		headers: setAuthHeader(options),
 	},
+)
+
+export const addList = async (options: { name: string, auth: AuthState }) => await dbAPI.post(
+	'reorder/list/',
+	{ name: options.name },
+	{ headers: setAuthHeader(options) },
+)
+
+
+export const deleteList = async (options: { id: string, auth: AuthState }) => await dbAPI.delete(
+	`reorder/list/${options.id}`,
+	{ headers: setAuthHeader(options) },
 )
 
 export const getAPIErrorMessage = (error: unknown) => {

@@ -20,6 +20,8 @@ const MAPPING = {
   'chevron.right': 'chevron-right',
   'barcode.viewfinder': 'barcode-reader',
   'x.circle': 'logout',
+  'note.text': 'notes',
+  'trash': 'delete'
 } as IconMapping;
 
 /**

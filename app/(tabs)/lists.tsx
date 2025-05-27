@@ -1,28 +1,50 @@
-import { Text, StyleSheet, View } from 'react-native'
+import { Text, StyleSheet, View, FlatList } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import { Image } from 'expo-image'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 import globalStyles from '@/styles/global'
 import { useContext, useEffect, useState } from 'react'
 import { ThemedText } from '@/components/ThemedText'
-import { getAPIErrorMessage, getLists } from '@/api/db'
+import { addList, getAPIErrorMessage, getLists } from '@/api/db'
 import { AuthContext } from '@/context/AuthContext'
 import { useBusy } from '@/hooks/useBusy'
 import ErrorText from '@/components/ui/ErrorText'
 import { useRouter } from 'expo-router'
+import ListComponent from '@/components/list/ListComponent'
+
+export type ListObject = {
+	_id: string
+	name: string
+}
 
 export default function ListsScreen() {
 	const { startTimedBusy, stopBusy } = useBusy()
 	const [errorText, setErrorText] = useState('')
 	const [lists, setLists] = useState([])
-	const [reload, setReload] = useState(false)
+	const [reload, setReload] = useState(true)
+	const [name, setName] = useState('')
 	const { state: authState } = useContext(AuthContext)
 
 	const router = useRouter()
 
-	useEffect(() => {
+	const handleCreatListClick = async () => {
+		if (name) {
+			startTimedBusy()
+			try {
+				await addList({ name, auth: authState })
+				setReload(true)
+			} catch (error) {
+				setErrorText(getAPIErrorMessage(error))
+				setReload(false)
+			}finally {
+				stopBusy()
+			}
+		}
+	}
 
-		if ((!lists || lists.length === 0) && !reload) {
+	useEffect(() => {
+		if (reload) {
+			setErrorText('')
 			const listAPI = async () => {
 				startTimedBusy()
 				try {
@@ -30,15 +52,17 @@ export default function ListsScreen() {
 					if (listResponse.data.data) {
 						setLists(listResponse.data.data)
 					}
+					setReload(false)
 				} catch (error) {
 					setErrorText(getAPIErrorMessage(error))
+					setReload(false)
 				} finally {
 					stopBusy()
 				}
 			}
 			listAPI()
 		}
-	}, [])
+	}, [reload])
 
 
 	return <ParallaxScrollView
@@ -56,14 +80,27 @@ export default function ListsScreen() {
 				inputStyle={styles.newListInputStyle}
 				placeholder={'New List Name'}
 				autoCapitalize={'words'}
+				value={name}
+				onChangeText={setName}
 			/>
 			<Button
 				style={styles.newListButtonStyle}
 				title={'+'}
+				onPress={handleCreatListClick}
 			/>
 		</View>
-		{lists.length > 0 ? <ThemedText>Lists found.</ThemedText> : <ThemedText>No lists found.</ThemedText>}
-		<ErrorText message={errorText}/>
+		<ErrorText message={errorText} />
+		{lists.length > 0
+			? <FlatList
+				data={lists}
+				keyExtractor={(list: ListObject) => list._id || list.name}
+				renderItem={({ item }) => <ListComponent
+					listItem={item}
+					setReload={setReload}
+					setErrorText={setErrorText}
+				/>}
+			/>
+			: <ThemedText type={'title'}>No lists found.</ThemedText>}
 	</ParallaxScrollView>
 }
 
