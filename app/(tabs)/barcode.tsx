@@ -6,38 +6,45 @@ import {ThemedView} from '@/components/ThemedView';
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import {Image} from "expo-image";
 import {CameraView, useCameraPermissions} from "expo-camera";
-import {useEffect, useState} from "react";
+import { useContext, useEffect, useState } from 'react'
 
 import wellaAPI from "@/api/wella";
 import {useBusy} from "@/hooks/useBusy";
 import globalStyles from '@/styles/global'
+import { router, useLocalSearchParams } from 'expo-router'
+import { addProduct, handleAPIRequest } from '@/api/db'
+import { AuthContext } from '@/context/AuthContext'
 
 const scannerSound = require('../../assets/sounds/scanner-beep.mp3')
 
 
 export default function BarcodeScreen() {
+    const {state: authState} = useContext(AuthContext)
     const {startTimedBusy, stopBusy} = useBusy()
-    const [barcode, setBarcode] = useState<string>('')
+    const [sku, setSku] = useState<string>('')
     const [product, setProduct] = useState<string>('')
     const [permission, requestPermission] = useCameraPermissions()
+    const { listId, listName }: { listId: string, listName: string} = useLocalSearchParams()
+    const [successMessage, setSuccessMessage] = useState('')
 
     const scannerSoundPlayer = useAudioPlayer(scannerSound);
 
     const resetState = () => {
         setProduct('')
-        setBarcode('')
+        setSku('')
+        setSuccessMessage('')
         scannerSoundPlayer.seekTo(0)
     }
 
     useEffect(() => {
-        if (!barcode) return
+        if (!sku) return
 
         const getUPCDetails = async () => {
             try {
                 startTimedBusy()
                 const response = await wellaAPI.get('searchByEan/', {
                     params: {
-                        ean: barcode,
+                        ean: sku,
                         lang: 'en'
                     }
                 })
@@ -54,7 +61,26 @@ export default function BarcodeScreen() {
         getUPCDetails()
         // no need to trigger on startTimedBusy or stopBusy.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [barcode]);
+    }, [sku]);
+
+    useEffect(() => {
+        if (!product) return
+
+        const addProductToList = async () => {
+            const response = await handleAPIRequest({
+                request: () => addProduct(listId, sku, product, 1),
+                router,
+                // Optionally include this if you're displaying errors
+                // onErrorMessage: (message) => console.error(message),
+            })
+
+            if (response) {
+                setSuccessMessage('Product Successfully Added')
+            }
+        }
+
+        addProductToList()
+    }, [product])
 
     if (!permission) {
         // Camera permissions are still loading.
@@ -98,15 +124,14 @@ export default function BarcodeScreen() {
             }>
             <ThemedView style={styles.titleContainer}>
                 <ThemedText type="title">Wella Product Scanner</ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.stepContainer}>
-                <ThemedText type="subtitle">{"Use this to keep track of your Wella product reorder needs."}</ThemedText>
+                <ThemedText type="subtitle">For List: {listName}</ThemedText>
             </ThemedView>
             {
-                barcode
+                sku
                     ? (<>
-                            <ThemedText type="subtitle">{barcode}</ThemedText>
+                            <ThemedText type="subtitle">{sku}</ThemedText>
                             <ThemedText type="subtitle">{product}</ThemedText>
+                            <ThemedText type={'subtitle'}>{successMessage}</ThemedText>
                             <Button
                                 title={'Next Product'}
                                 onPress={resetState}
@@ -118,7 +143,7 @@ export default function BarcodeScreen() {
                             <Button
                                 title={"Simulate Barcode Scan"}
                                 onPress={() => {
-                                    setBarcode("4064666230160")
+                                    setSku("4064666230160")
                                 }}
                             />
                             <CameraView
@@ -130,7 +155,7 @@ export default function BarcodeScreen() {
                                 }}
                                 onBarcodeScanned={(scanningResult) => {
                                     scannerSoundPlayer.play()
-                                    setBarcode(scanningResult.data)
+                                    setSku(scanningResult.data)
                                 }}
                             />
                         </>
@@ -143,7 +168,7 @@ export default function BarcodeScreen() {
 const styles = StyleSheet.create({
     ...globalStyles,
     titleContainer: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         gap: 8,
     },

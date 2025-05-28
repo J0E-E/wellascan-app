@@ -1,53 +1,155 @@
-import axios, { AxiosError } from 'axios'
-import { AuthState } from '@/context/AuthContext'
+import axios, { AxiosResponse, HttpStatusCode } from 'axios'
+import { AuthState, SetTokensOptions } from '@/context/AuthContext'
+import { useRouter } from 'expo-router'
+
+
+let authState: AuthState | null = null
+let setAuthFn: ((options: SetTokensOptions) => void) | null = null
+let unsetAuthFn: (() => void) | null = null
+
+export const setAuthState = (auth: AuthState) => (authState = auth)
+export const clearAuthState = () => (authState = null)
+export const getAuthState = () => authState
+
+export const setContextAuthHandlers = ({ setAuth, unsetAuth }: {
+	setAuth: (options: SetTokensOptions) => void
+	unsetAuth: () => void
+}) => {
+	setAuthFn = setAuth
+	unsetAuthFn = unsetAuth
+}
 
 const dbAPI = axios.create({
-	baseURL: 'https://feb1-2603-9000-d801-849b-7993-adb9-1043-50f2.ngrok-free.app',
+	baseURL: 'https://3f15-2603-9000-d801-849b-7898-3508-4b61-4695.ngrok-free.app',
 })
 
-type AuthOptions = {
-	email: string,
-	password: string
+
+let isRefreshing = false
+let failedQueue: (() => void)[] = []
+
+dbAPI.interceptors.request.use((config) => {
+	const auth = getAuthState()
+
+	if (auth?.token) {
+		if (config.headers && typeof (config.headers as any).set === 'function') {
+			(config.headers as any).set('Authorization', `Bearer ${auth.token}`)
+		} else if (typeof config.headers === 'object') {
+			(config.headers as Record<string, string>)['Authorization'] = `Bearer ${auth.token}`
+		}
+	}
+
+	return config
+})
+
+dbAPI.interceptors.response.use((response) => response, async (error) => {
+	const originalRequest = error.config
+
+	if (error.response?.status === 401 && !originalRequest._retry) {
+		originalRequest._retry = true
+
+		const currentAuth = getAuthState()
+		if (!currentAuth?.refreshToken) {
+			unsetAuthFn?.()
+			clearAuthState()
+			return Promise.reject(error)
+		}
+
+		if (!isRefreshing) {
+			isRefreshing = true
+			try {
+				const response = await dbAPI.post('/auth/refreshtoken', {
+					refreshToken: currentAuth.refreshToken,
+				})
+
+				const newTokens = response.data.data
+				setAuthFn?.({ token: newTokens.token, refreshToken: newTokens.refreshToken })
+				setAuthState({ token: newTokens.token, refreshToken: newTokens.refreshToken })
+
+				isRefreshing = false
+				failedQueue.forEach((callback) => callback())
+				failedQueue = []
+
+				return dbAPI(originalRequest)
+			} catch (error) {
+				isRefreshing = false
+				failedQueue = []
+				unsetAuthFn?.()
+				clearAuthState()
+				return Promise.reject(error)
+			}
+		}
+
+		return new Promise((resolve) => {
+			failedQueue.push(() => resolve(dbAPI(originalRequest)))
+		})
+	}
+
+	return Promise.reject(error)
+})
+
+export const signUp = async (options: { email: string; password: string }) =>
+	await dbAPI.post('auth/signup', options)
+
+export const signIn = async (options: { email: string; password: string }) =>
+	await dbAPI.post('auth/signin', options)
+
+export const getLists = async (id?: string) =>
+	await dbAPI.get(`reorder/list/${id || ''}`)
+
+export const addList = async (name: string) =>
+	await dbAPI.post('reorder/list/', { name })
+
+export const deleteList = async (id: string) =>
+	await dbAPI.delete(`reorder/list/${id}`)
+
+export const addProduct = async (listId: string, sku: string, name: string, quantity: number = 1) =>
+	await dbAPI.post(`reorder/product/${listId}`, { sku, name, quantity })
+
+export type APIError = {
+	message: string
+	shouldLogOut: boolean
 }
 
-const setAuthHeader = (options: { auth: AuthState }) => {
-	return { 'Authorization': 'Bearer ' + options.auth.token }
-}
-
-export const signUp = async (options: AuthOptions) => await dbAPI.post('auth/signup', { ...options })
-
-export const signIn = async (options: AuthOptions) => await dbAPI.post('auth/signin', { ...options })
-
-export const getLists = async (options: { id?: string, auth: AuthState }) => await dbAPI.get(
-	'reorder/list/',
-	{
-		params: options.id ? { id: options.id } : {},
-		headers: setAuthHeader(options),
-	},
-)
-
-export const addList = async (options: { name: string, auth: AuthState }) => await dbAPI.post(
-	'reorder/list/',
-	{ name: options.name },
-	{ headers: setAuthHeader(options) },
-)
-
-
-export const deleteList = async (options: { id: string, auth: AuthState }) => await dbAPI.delete(
-	`reorder/list/${options.id}`,
-	{ headers: setAuthHeader(options) },
-)
-
-export const getAPIErrorMessage = (error: unknown) => {
+export const getAPIError = (error: unknown): APIError => {
 	console.error(error)
 	if (axios.isAxiosError(error) && error.response) {
 		const data = error.response.data as { error?: string; message?: string }
-		return data.error || data.message || 'Something went wrong. Try again.'
+		const isUnauthorized = error.response.status === HttpStatusCode.Unauthorized
+		return {
+			message: data.error || data.message || 'Something went wrong. Try again.',
+			shouldLogOut: isUnauthorized,
+		}
 	}
 
 	if (error instanceof Error) {
-		return error.message
+		return { message: error.message, shouldLogOut: false }
 	}
 
-	return 'Something went wrong. Try again.'
+	return { message: 'Something went wrong. Try again.', shouldLogOut: false }
 }
+
+export type APIHandlerOptions<T> = {
+	request: () => Promise<T>
+	onErrorMessage?: (message: string) => void
+	router?: ReturnType<typeof useRouter>
+}
+
+export const handleAPIRequest = async <T>({ request, onErrorMessage, router }: APIHandlerOptions<AxiosResponse<T>>)
+	: Promise<T | null> => {
+	try {
+		onErrorMessage?.('')
+		const response = await request()
+		return response.data
+	} catch (error) {
+		const parsed = getAPIError(error)
+		if (parsed.shouldLogOut) {
+			unsetAuthFn?.()
+			clearAuthState()
+			router?.replace('/login')
+		}
+		onErrorMessage?.(parsed.message)
+		return null
+	}
+}
+
+export default dbAPI

@@ -9,7 +9,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { AuthContext } from '@/context/AuthContext'
 import { useRouter } from 'expo-router'
 import Spacer from '@/components/ui/Spacer'
-import { signUp, signIn, getAPIErrorMessage } from '@/api/db'
+import { signUp, signIn, getAPIError } from '@/api/db'
 import { useBusy } from '@/hooks/useBusy'
 import ErrorText from '@/components/ui/ErrorText'
 import globalStyles from '@/styles/global'
@@ -51,7 +51,7 @@ export default function LoginScreen() {
 				setAuth({ ...authResponse.data.data })
 			}
 		} catch (error: unknown) {
-			setErrorText(getAPIErrorMessage(error))
+			setErrorText(getAPIError(error))
 			unsetAuth()
 		} finally {
 			stopBusy()

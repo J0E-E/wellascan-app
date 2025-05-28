@@ -4,10 +4,10 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 
-import { AuthProvider } from '@/context/AuthContext'
 import { BusyProvider } from '@/context/BusyContext'
 import BusyOverlay from '@/components/busy/BusyOverlay'
 import { useColorScheme } from '@/hooks/useColorScheme'
+import { AuthProviderWrapper } from '@/context/AuthProviderWrapper'
 
 export default function RootLayout() {
 	const colorScheme = useColorScheme()
@@ -21,18 +21,19 @@ export default function RootLayout() {
 	}
 
 	return (
-		<AuthProvider>
+		<AuthProviderWrapper>
 			<BusyProvider>
 				<BusyOverlay />
 				<ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
 					<Stack>
 						<Stack.Screen name={'login'} options={{ headerShown: false }} />
-						<Stack.Screen name={'(tabs)'} options={{ headerShown: false }} />
+						<Stack.Screen name={'list'} options={{title: 'Lists'}} />
+						<Stack.Screen name={'(tabs)'} options={{ headerShown: false, title: "Back" }} />
 						<Stack.Screen name={'+not-found'} />
 					</Stack>
 					<StatusBar style="auto" />
 				</ThemeProvider>
 			</BusyProvider>
-		</AuthProvider>
+		</AuthProviderWrapper>
 	)
 }

@@ -3,30 +3,30 @@ import { Dispatch } from 'react'
 
 export type AuthState = {
 	token: string
-	refreshtoken: string
+	refreshToken: string
 }
 
 type AuthAction =
 	| {type: 'set_auth', payload: {token: string; refreshToken: string}}
 	| {type: 'unset_auth'}
 
-type SetTokensOptions = {
+export type SetTokensOptions = {
 	token: string,
 	refreshToken: string
 }
 
 const defaultState: AuthState = {
 	token: '',
-	refreshtoken: ''
+	refreshToken: ''
 }
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 	switch (action.type) {
 		case 'set_auth':
-			return { token: action.payload.token, refreshtoken: action.payload.refreshToken}
+			return { token: action.payload.token, refreshToken: action.payload.refreshToken}
 		case 'unset_auth':
 		default:
-			return {token: '', refreshtoken: ''}
+			return {token: '', refreshToken: ''}
 	}
 }
 

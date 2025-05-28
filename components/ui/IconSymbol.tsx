@@ -21,7 +21,8 @@ const MAPPING = {
   'barcode.viewfinder': 'barcode-reader',
   'x.circle': 'logout',
   'note.text': 'notes',
-  'trash': 'delete'
+  'trash': 'delete',
+  'pencil': 'edit'
 } as IconMapping;
 
 /**
