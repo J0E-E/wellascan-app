@@ -6,10 +6,10 @@ import { useContext, useEffect, useState } from 'react'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
-import { AuthContext } from '@/context/AuthContext'
+import { AuthContext } from '@/context/auth/AuthContext'
 import { useRouter } from 'expo-router'
 import Spacer from '@/components/ui/Spacer'
-import { signUp, signIn, getAPIError } from '@/api/db'
+import { signUp, signIn, getAPIError, handleAPIRequest, getLists } from '@/api/db'
 import { useBusy } from '@/hooks/useBusy'
 import ErrorText from '@/components/ui/ErrorText'
 import globalStyles from '@/styles/global'
@@ -35,7 +35,6 @@ export default function LoginScreen() {
 	 */
 	const handleAuth = async () => {
 		startTimedBusy()
-		setErrorText('')
 
 		if (!email || !password) {
 			// TODO: add email field validation.
@@ -45,17 +44,18 @@ export default function LoginScreen() {
 		}
 
 		const authFn = isSignUp ? signUp : signIn
-		try {
-			const authResponse = await authFn({ email, password })
-			if (authResponse.data.data) {
-				setAuth({ ...authResponse.data.data })
-			}
-		} catch (error: unknown) {
-			setErrorText(getAPIError(error))
-			unsetAuth()
-		} finally {
-			stopBusy()
+
+		const loginResponse = await handleAPIRequest({
+			request: () => authFn({ email, password }), // no params needed unless you're filtering by ID
+			onErrorMessage: setErrorText,
+			router,
+		})
+
+		if (loginResponse.data) {
+			setAuth(loginResponse.data)
 		}
+
+		stopBusy()
 	}
 
 	useEffect(() => {

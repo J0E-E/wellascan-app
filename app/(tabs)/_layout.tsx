@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router'
 import { useContext, useEffect, useState } from 'react'
-import { AuthContext } from '@/context/AuthContext'
+import { AuthContext } from '@/context/auth/AuthContext'
 import { useRouter } from 'expo-router'
 import { View, ActivityIndicator, Platform } from 'react-native'
 import { useColorScheme } from 'react-native'

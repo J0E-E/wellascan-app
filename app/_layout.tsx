@@ -4,10 +4,10 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 
-import { BusyProvider } from '@/context/BusyContext'
+import { BusyProvider } from '@/context/busy/BusyContext'
 import BusyOverlay from '@/components/busy/BusyOverlay'
 import { useColorScheme } from '@/hooks/useColorScheme'
-import { AuthProviderWrapper } from '@/context/AuthProviderWrapper'
+import { AuthProviderWrapper } from '@/context/auth/AuthProviderWrapper'
 
 export default function RootLayout() {
 	const colorScheme = useColorScheme()

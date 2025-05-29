@@ -4,8 +4,8 @@ import React, { Dispatch, useContext } from 'react'
 import { View, StyleSheet, Pressable } from 'react-native'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { useThemeColor } from '@/hooks/useThemeColor'
-import { deleteList, getAPIError } from '@/api/db'
-import { AuthContext } from '@/context/AuthContext'
+import { deleteList, getAPIError, handleAPIRequest } from '@/api/db'
+import { AuthContext } from '@/context/auth/AuthContext'
 import { useRouter } from 'expo-router'
 
 export default function ListComponent({ listItem, setReload, setErrorText }: {
@@ -13,18 +13,19 @@ export default function ListComponent({ listItem, setReload, setErrorText }: {
 	setReload: Dispatch<React.SetStateAction<boolean>>,
 	setErrorText: Dispatch<React.SetStateAction<string>>
 }) {
-	const router = useRouter()
 	const { state: authState } = useContext(AuthContext)
 	const color = useThemeColor({ light: 'black', dark: 'white' }, 'text')
+	const router = useRouter()
 
 	const handleDelete = async () => {
-		try {
-			await deleteList({ id: listItem._id, auth: authState })
-			setReload(true)
-		} catch (error) {
-			setErrorText(getAPIError(error))
-			setReload(false)
-		}
+
+		const deleteResponse = await handleAPIRequest({
+			request: () => deleteList(listItem._id),
+			onErrorMessage: (message) => setErrorText(message),
+			router
+		})
+
+		setReload(!!deleteResponse)
 	}
 
 	return <View style={styles.containerStyle}>

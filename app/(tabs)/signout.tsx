@@ -1,6 +1,6 @@
 import { useEffect, useContext } from 'react';
 import { Redirect } from 'expo-router';
-import { AuthContext } from '@/context/AuthContext';
+import { AuthContext } from '@/context/auth/AuthContext';
 
 export default function SignOut() {
 	const { state: authState, unsetAuth } = useContext(AuthContext);

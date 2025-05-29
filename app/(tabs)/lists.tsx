@@ -2,10 +2,9 @@ import { StyleSheet, View, FlatList } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import { Image } from 'expo-image'
 import globalStyles from '@/styles/global'
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ThemedText } from '@/components/ThemedText'
 import { addList, getLists, handleAPIRequest } from '@/api/db'
-import { AuthContext } from '@/context/AuthContext'
 import { useBusy } from '@/hooks/useBusy'
 import ErrorText from '@/components/ui/ErrorText'
 import { useFocusEffect, useRouter } from 'expo-router'
@@ -18,13 +17,16 @@ export type ListObject = {
 
 export default function ListsScreen() {
 	const { startTimedBusy, stopBusy } = useBusy()
-	const [errorText, setErrorText] = useState('')
-	const [lists, setLists] = useState([])
-	const [reload, setReload] = useState(true)
-	const [name, setName] = useState('')
 	const router = useRouter()
 
+	const [errorText, setErrorText] = useState('')	// UI error message
+	const [lists, setLists] = useState([])			// Fetched list data
+	const [reload, setReload] = useState(true)		// Triggers re-fetch and render when true
+	const [name, setName] = useState('')			// Input value for new list
+
+
 	const handleCreateListClick = async () => {
+		// Handles the creation of a new list.
 		setErrorText('')
 
 		if (!name) {
@@ -33,13 +35,12 @@ export default function ListsScreen() {
 		}
 
 		startTimedBusy()
-
+		// ADD new list to DB
 		const addListResponse = await handleAPIRequest({
-			request: () => addList(name), // <-- simplified: no auth needed
+			request: () => addList(name),
 			onErrorMessage: setErrorText,
 			router,
 		})
-
 		stopBusy()
 
 		if (addListResponse) {
@@ -49,6 +50,7 @@ export default function ListsScreen() {
 	}
 
 	useFocusEffect(
+		// Triggers re-fetch and render when screen regains focus.
 		useCallback(() => {
 			setReload(true)
 			return
@@ -56,24 +58,25 @@ export default function ListsScreen() {
 	)
 
 	useEffect(() => {
+		// Re-fetch Re-render trigger for the screen.
 		if (!reload) return
 
 		setErrorText('')
 
 		const listAPI = async () => {
-			startTimedBusy()
 
+			startTimedBusy()
+			// GET list data
 			const getListResponse = await handleAPIRequest({
-				request: getLists, // no params needed unless you're filtering by ID
+				request: getLists,
 				onErrorMessage: setErrorText,
 				router,
 			})
-
 			if (getListResponse?.data) {
 				setLists(getListResponse.data)
 			}
-
 			stopBusy()
+
 			setReload(false)
 		}
 
