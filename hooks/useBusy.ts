@@ -1,5 +1,5 @@
 import {useContext} from "react";
-import {BusyContext} from "@/context/BusyContext";
+import {BusyContext} from "@/context/busy/BusyContext";
 
 export const useBusy = () => {
     const context = useContext(BusyContext)

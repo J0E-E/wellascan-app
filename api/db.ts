@@ -1,26 +1,11 @@
 import axios, { AxiosResponse, HttpStatusCode } from 'axios'
-import { AuthState, SetTokensOptions } from '@/context/AuthContext'
 import { useRouter } from 'expo-router'
+import { clearAuthState, getAuthState, getContextAuthHandlers, setAuthState } from '@/context/auth/authSync'
 
-
-let authState: AuthState | null = null
-let setAuthFn: ((options: SetTokensOptions) => void) | null = null
-let unsetAuthFn: (() => void) | null = null
-
-export const setAuthState = (auth: AuthState) => (authState = auth)
-export const clearAuthState = () => (authState = null)
-export const getAuthState = () => authState
-
-export const setContextAuthHandlers = ({ setAuth, unsetAuth }: {
-	setAuth: (options: SetTokensOptions) => void
-	unsetAuth: () => void
-}) => {
-	setAuthFn = setAuth
-	unsetAuthFn = unsetAuth
-}
+const { setAuthFn, unsetAuthFn, }= getContextAuthHandlers()
 
 const dbAPI = axios.create({
-	baseURL: 'https://3f15-2603-9000-d801-849b-7898-3508-4b61-4695.ngrok-free.app',
+	baseURL: 'https://de7b-2603-9000-d801-849b-982e-7799-d532-c471.ngrok-free.app',
 })
 
 
