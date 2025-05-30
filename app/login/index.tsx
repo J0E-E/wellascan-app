@@ -50,8 +50,8 @@ export default function LoginScreen() {
 			onErrorMessage: setErrorText,
 			router,
 		})
-
-		if (loginResponse.data) {
+		console.log('here')
+		if (loginResponse?.data) {
 			setAuth(loginResponse.data)
 		}
 
@@ -74,7 +74,7 @@ export default function LoginScreen() {
 			/>
 		}
 		withTabBar={false}>
-		<ThemedView>
+		<ThemedView style={styles.authContainer}>
 			<ThemedText type={'title'}>{isSignUp ? 'Sign-Up' : 'Login'}</ThemedText>
 			<Spacer />
 			<Input
@@ -95,12 +95,23 @@ export default function LoginScreen() {
 				secureTextEntry
 				value={password}
 				onChangeText={setPassword}
+				onSubmitEditing={handleAuth}
 			/>
 			<Spacer />
 			<Button
-				title={(isSignUp ? 'Sign-Up' : 'Login')}
+				title={isSignUp ? 'Sign-Up' : 'Login'}
 				onPress={handleAuth}
 				disabled={!email || !password}
+				buttonStyle={{
+					backgroundColor: !email || !password ? '#444' : '#cc1a1a',
+					borderRadius: 8,
+					paddingVertical: 12,
+				}}
+				titleStyle={{
+					color: '#fff',
+					fontWeight: 'bold',
+					fontSize: 16,
+				}}
 			/>
 			<Spacer />
 			<Pressable
@@ -116,22 +127,25 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
 	...globalStyles,
-	titleContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 8,
+
+	authContainer: {
+		backgroundColor: '#1e1e1e',
+		paddingHorizontal: 24,
+		paddingVertical: 40,
+		marginHorizontal: 16,
+		marginTop: 32,
+		borderRadius: 12,
 	},
-	stepContainer: {
-		gap: 8,
-		marginBottom: 8,
-	},
+
 	inputStyle: {
 		color: '#ffffff',
 	},
+
 	switchButtonStyle: {
 		fontWeight: 'bold',
 		textAlign: 'center',
-		fontSize: 20,
-		color: '#000fff',
+		fontSize: 16,
+		color: '#cc1a1a',
+		marginTop: 12,
 	},
 })

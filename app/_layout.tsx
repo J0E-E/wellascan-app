@@ -8,6 +8,7 @@ import { BusyProvider } from '@/context/busy/BusyContext'
 import BusyOverlay from '@/components/busy/BusyOverlay'
 import { useColorScheme } from '@/hooks/useColorScheme'
 import { AuthProviderWrapper } from '@/context/auth/AuthProviderWrapper'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 export default function RootLayout() {
 	const colorScheme = useColorScheme()
@@ -21,19 +22,21 @@ export default function RootLayout() {
 	}
 
 	return (
-		<AuthProviderWrapper>
-			<BusyProvider>
-				<BusyOverlay />
-				<ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-					<Stack>
-						<Stack.Screen name={'login'} options={{ headerShown: false }} />
-						<Stack.Screen name={'list'} options={{title: 'Lists'}} />
-						<Stack.Screen name={'(tabs)'} options={{ headerShown: false, title: "Back" }} />
-						<Stack.Screen name={'+not-found'} />
-					</Stack>
-					<StatusBar style="auto" />
-				</ThemeProvider>
-			</BusyProvider>
-		</AuthProviderWrapper>
+		<GestureHandlerRootView>
+			<AuthProviderWrapper>
+				<BusyProvider>
+					<BusyOverlay />
+					<ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+						<Stack>
+							<Stack.Screen name={'login'} options={{ headerShown: false }} />
+							<Stack.Screen name={'list'} options={{ title: 'Lists' }} />
+							<Stack.Screen name={'(tabs)'} options={{ headerShown: false, title: 'Back' }} />
+							<Stack.Screen name={'+not-found'} />
+						</Stack>
+						<StatusBar style="auto" />
+					</ThemeProvider>
+				</BusyProvider>
+			</AuthProviderWrapper>
+		</GestureHandlerRootView>
 	)
 }

@@ -2,10 +2,10 @@ import axios, { AxiosResponse, HttpStatusCode } from 'axios'
 import { useRouter } from 'expo-router'
 import { clearAuthState, getAuthState, getContextAuthHandlers, setAuthState } from '@/context/auth/authSync'
 
-const { setAuthFn, unsetAuthFn, }= getContextAuthHandlers()
+const { setAuthFn, unsetAuthFn } = getContextAuthHandlers()
 
 const dbAPI = axios.create({
-	baseURL: 'https://de7b-2603-9000-d801-849b-982e-7799-d532-c471.ngrok-free.app',
+	baseURL: 'https://0a94-2603-9000-d801-849b-2c58-544b-6ffd-fd26.ngrok-free.app',
 })
 
 
@@ -89,6 +89,24 @@ export const deleteList = async (id: string) =>
 
 export const addProduct = async (listId: string, sku: string, name: string, quantity: number = 1) =>
 	await dbAPI.post(`reorder/product/${listId}`, { sku, name, quantity })
+
+type AdjustQuantityParams =
+	| { id: string; type: 'increase' | 'decrease' }
+	| { id: string; type: 'set'; quantity: number }
+
+export const adjustProductQuantity = async (params: AdjustQuantityParams) => {
+	if (params.type === 'set') {
+		const { id, type, quantity } = params
+		return await dbAPI.patch(`reorder/product/${id}`, { type, quantity })
+	} else {
+		const { id, type } = params
+		return await dbAPI.patch(`reorder/product/${id}`, { type })
+	}
+}
+
+export const deleteProduct = async (id: string) => {
+	return await dbAPI.delete(`reorder/product/${id}`)
+}
 
 export type APIError = {
 	message: string

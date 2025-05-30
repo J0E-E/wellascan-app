@@ -1,12 +1,13 @@
-import { View, StyleSheet, FlatList, Text, Pressable } from 'react-native'
+import { View, StyleSheet, FlatList, Pressable } from 'react-native'
 import { ThemedText } from '@/components/ThemedText'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { getLists, handleAPIRequest } from '@/api/db'
-import { AuthContext } from '@/context/auth/AuthContext'
 import { useThemeColor } from '@/hooks/useThemeColor'
 import { Button } from 'react-native-elements'
 import { IconSymbol } from '@/components/ui/IconSymbol'
+import { ProductObject } from '@/types'
+import ProductComponent from '@/components/product/ProductComponent'
 
 export default function ListScreen() {
 	const { id }: { id: string } = useLocalSearchParams()
@@ -31,8 +32,6 @@ export default function ListScreen() {
 			const listResponse = await handleAPIRequest({
 				request: () => getLists(id),
 				router,
-				// optionally add this if you're managing error UI
-				// onErrorMessage: setErrorText,
 			})
 
 			if (listResponse?.data.name) {
@@ -49,90 +48,115 @@ export default function ListScreen() {
 	}, [reload])
 
 	return (
-		<View style={styles.containerStyle}>
-			<ThemedText type={'title'} style={styles.titleStyle}>
-				{listName + '  '}
-				<Pressable onPress={() => {
-					console.log('EDIT')
-				}}>
-					<IconSymbol
-						size={25}
-						name="pencil"
-						color={color}
-					/>
+		<View style={styles.container}>
+			<View style={styles.titleRow}>
+				<ThemedText type="title" style={styles.titleText}>
+					{listName}
+				</ThemedText>
+				<Pressable style={styles.editButton} onPress={() => console.log('EDIT')}>
+					<IconSymbol size={20} name="pencil" color={color} />
 				</Pressable>
-			</ThemedText>
+			</View>
+
 			<View style={styles.productsContainer}>
 				<FlatList
 					data={products}
-					keyExtractor={(product: { _id: string, name: string, reorderQuantity: number }) => product._id || product.name}
-					renderItem={({ item }) => {
-						return <View style={styles.itemContainerStyle}>
-							<Text style={styles.itemNameStyle}>{item.name}</Text>
-							<Text style={styles.quantityStyle}>{item.reorderQuantity}</Text>
+					keyExtractor={(product: ProductObject) => product._id}
+					renderItem={({ item }) => (
+						<View style={styles.productCard}>
+							<ProductComponent product={item} reloadCallback={() => setReload(true)} />
 						</View>
-					}}
-					ListEmptyComponent={<View>
-						<ThemedText type={'title'} style={{ textAlign: 'center', paddingVertical: 100 }}>NO PRODUCTS IN LIST</ThemedText>
-					</View>
+					)}
+					ListEmptyComponent={
+						<ThemedText type="subtitle" style={styles.emptyText}>
+							No products in this list.
+						</ThemedText>
 					}
 				/>
 			</View>
+
 			<Button
-				title={'Scan Products To List'}
+				title="Scan Products To List"
 				onPress={() => {
-					router.navigate({ pathname: `/(tabs)/barcode`, params: { listId: id, listName } })
+					router.navigate({
+						pathname: '/(tabs)/barcode',
+						params: { listId: id, listName },
+					})
 				}}
+				buttonStyle={styles.scanButton}
+				titleStyle={styles.scanButtonTitle}
 			/>
+
+			<View style={styles.footerSpacing} />
 		</View>
 	)
 }
 
 const styles = StyleSheet.create({
-	containerStyle: {
+	container: {
 		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		padding: 30,
+		backgroundColor: '#121212',
+		paddingHorizontal: 20,
+		paddingTop: 40,
 	},
+
+	titleRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: 8,
+		marginBottom: 20,
+	},
+
+	titleText: {
+		fontSize: 24,
+		fontWeight: 'bold',
+		color: 'white',
+	},
+
+	editButton: {
+		backgroundColor: '#2a2a2a',
+		padding: 8,
+		borderRadius: 6,
+	},
+
 	productsContainer: {
 		flex: 1,
 		width: '100%',
 		borderWidth: 1,
 		borderColor: '#393939',
-		margin: 20,
+		borderRadius: 12,
+		padding: 10,
+		marginBottom: 20,
 	},
-	titleStyle: {
-		marginVertical: 10,
+
+	productCard: {
+		backgroundColor: '#1e1e1e',
+		borderRadius: 12,
+		padding: 16,
+		marginBottom: 12,
 	},
-	productsStyle: {
-		marginTop: 20,
+
+	emptyText: {
+		color: '#777',
 		textAlign: 'center',
+		fontSize: 18,
+		marginTop: 100,
 	},
-	itemContainerStyle: {
-		color: 'white',
-		height: 100,
-		width: '100%',
-		flexDirection: 'row',
-		justifyContent: 'space-between',
+
+	scanButton: {
+		backgroundColor: '#cc1a1a',
+		borderRadius: 10,
+		paddingVertical: 14,
 	},
-	itemNameStyle: {
-		width: '80%',
-		color: 'white',
-		borderColor: '#404040',
-		borderWidth: 1,
-		textAlign: 'left',
-		fontSize: 25,
-		paddingHorizontal: 20,
+
+	scanButtonTitle: {
+		color: '#fff',
+		fontWeight: 'bold',
+		fontSize: 16,
 	},
-	quantityStyle: {
-		color: 'white',
-		fontSize: 30,
-		borderColor: '#404040',
-		borderWidth: 1,
-		width: 50,
-		textAlign: 'center',
-		alignContent: 'center',
-		justifyContent: 'center',
+
+	footerSpacing: {
+		height: 30,
 	},
 })

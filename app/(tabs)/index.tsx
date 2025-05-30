@@ -17,21 +17,30 @@ export default function HomeScreen() {
           style={styles.wellaLogo}
         />
       }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome To the Wella App!</ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Scan Used Product</ThemedText>
-        <ThemedText>
-            {'Use the built-in barcode scanner to keep a running list of reorder needs.'}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Build Shopping Cart</ThemedText>
-        <ThemedText>
-          {`Use this app to pre-stock your Wella shopping cart with your order needs.`}
-        </ThemedText>
-      </ThemedView>
+        <ThemedView style={styles.titleContainer}>
+            <ThemedText type="title">Welcome to the Wella App!</ThemedText>
+        </ThemedView>
+
+        <ThemedView style={styles.stepContainer}>
+            <ThemedText type="subtitle">Step 1: Create a List</ThemedText>
+            <ThemedText>
+                Go to the Lists tab and create at least one list. This is where your scanned products will go.
+            </ThemedText>
+        </ThemedView>
+
+        <ThemedView style={styles.stepContainer}>
+            <ThemedText type="subtitle">Step 2: Select Your List</ThemedText>
+            <ThemedText>
+                Open the list and tap "Scan Products to List" — or go to the Barcode tab and pick a list to start scanning into.
+            </ThemedText>
+        </ThemedView>
+
+        <ThemedView style={styles.stepContainer}>
+            <ThemedText type="subtitle">Step 3: Start Scanning!</ThemedText>
+            <ThemedText>
+                Scan Wella products as you use them to keep your reorder list up to date.
+            </ThemedText>
+        </ThemedView>
     </ParallaxScrollView>
   );
 }

@@ -9,11 +9,7 @@ import { useBusy } from '@/hooks/useBusy'
 import ErrorText from '@/components/ui/ErrorText'
 import { useFocusEffect, useRouter } from 'expo-router'
 import ListComponent from '@/components/list/ListComponent'
-
-export type ListObject = {
-	_id: string
-	name: string
-}
+import { ListObject } from '@/types'
 
 export default function ListsScreen() {
 	const { startTimedBusy, stopBusy } = useBusy()
@@ -92,20 +88,21 @@ export default function ListsScreen() {
 					style={styles.wellaLogoLocal}
 				/>
 			</View>
-			<View style={styles.newListStyle}>
+			<View style={styles.inputRow}>
 				<Input
-					containerStyle={styles.newListInputContainerStyle}
-					inputStyle={styles.newListInputStyle}
-					placeholder={'New List Name'}
-					autoCapitalize={'words'}
+					placeholder="Add New List"
+					autoCapitalize="words"
 					value={name}
 					onChangeText={setName}
 					onSubmitEditing={handleCreateListClick}
+					placeholderTextColor="#888"
+					inputStyle={styles.input}
+					containerStyle={styles.inputContainer}
 				/>
 				<Button
-					style={styles.newListButtonStyle}
-					title={'+'}
+					title="+"
 					onPress={handleCreateListClick}
+					buttonStyle={styles.addButton}
 				/>
 			</View>
 			<ErrorText message={errorText} />
@@ -169,4 +166,32 @@ const styles = StyleSheet.create({
 		backgroundColor: '#191919',
 		padding: 10,
 	},
+	inputRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: 16,
+		marginTop: 16,
+	},
+	inputContainer: {
+		flex: 1,
+		marginRight: 10,
+	},
+	input: {
+		color: 'white',
+		fontSize: 16,
+	},
+	addButton: {
+		backgroundColor: '#cc1a1a',
+		borderRadius: 8,
+		paddingHorizontal: 20,
+		paddingVertical: 12,
+	},
+	// flatListContainerStyle: {
+	// 	flex: 1,
+	// },
+	// flatListContentContainerStyle: {
+	// 	padding: 16,
+	// 	backgroundColor: '#121212',
+	// 	gap: 12, // adds spacing between list items
+	// },
 })

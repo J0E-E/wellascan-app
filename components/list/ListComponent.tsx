@@ -1,19 +1,17 @@
 import { ThemedText } from '@/components/ThemedText'
-import { ListObject } from '@/app/(tabs)/lists'
-import React, { Dispatch, useContext } from 'react'
+import React, { Dispatch } from 'react'
 import { View, StyleSheet, Pressable } from 'react-native'
 import { IconSymbol } from '@/components/ui/IconSymbol'
 import { useThemeColor } from '@/hooks/useThemeColor'
-import { deleteList, getAPIError, handleAPIRequest } from '@/api/db'
-import { AuthContext } from '@/context/auth/AuthContext'
+import { deleteList, handleAPIRequest } from '@/api/db'
 import { useRouter } from 'expo-router'
+import { ListObject } from '@/types'
 
 export default function ListComponent({ listItem, setReload, setErrorText }: {
 	listItem: ListObject,
 	setReload: Dispatch<React.SetStateAction<boolean>>,
 	setErrorText: Dispatch<React.SetStateAction<string>>
 }) {
-	const { state: authState } = useContext(AuthContext)
 	const color = useThemeColor({ light: 'black', dark: 'white' }, 'text')
 	const router = useRouter()
 
