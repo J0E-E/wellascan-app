@@ -29,9 +29,9 @@ export default function AddToCartScreen() {
 	const [productsToReorder, setProductsToReorder] = useState<ProductObject[]>([])
 	const [errorList, setErrorList] = useState<string[]>([])
 	const [completed, setCompleted] = useState(false)
+	const [errorMessage, setErrorMessage] = useState('')
 
 	useEffect(() => {
-
 		(async () => {
 			startTimedBusy()
 			const getListResponse = await handleAPIRequest({
@@ -46,30 +46,23 @@ export default function AddToCartScreen() {
 	}, [])
 
 	useEffect(() => {
-		if (
-			id &&
-			lists.length > 0
-		) {
+		if (id && lists.length > 0) {
 			const foundList = lists.find((list: ListObject) => list._id === id)
-
 			if (!foundList) return
 
-			if (foundList) {
-				(async () => {
-					startTimedBusy()
-					const getListResponse = await handleAPIRequest({
-						request: () => getLists(foundList._id),
-						router,
-					})
-					if (getListResponse?.data) {
-						setProductsToReorder(getListResponse.data.productsToReorder)
-					}
-					stopBusy()
-				})()
-			}
+			(async () => {
+				startTimedBusy()
+				const getListResponse = await handleAPIRequest({
+					request: () => getLists(foundList._id),
+					router,
+				})
+				if (getListResponse?.data) {
+					setProductsToReorder(getListResponse.data.productsToReorder)
+				}
+				stopBusy()
+			})()
 		}
 	}, [id, lists])
-
 
 	const handlePickImageAndDecode = async (): Promise<void> => {
 		try {
@@ -87,66 +80,49 @@ export default function AddToCartScreen() {
 			if (scanned.length > 0) {
 				setQR(scanned[0].data)
 			} else {
-				console.error('No QR code found in image')
+				setErrorMessage('No QR code found in image')
 			}
 		} catch (err) {
+			setErrorMessage('Failed to scan QR from image.')
 			console.error('Failed to scan QR from image:', err)
 		}
 	}
 
 	const handleSendToCart = async (): Promise<void> => {
-		if (!qr || !productsToReorder) return // TODO: show error message
+		if (!qr || !productsToReorder) {
+			setErrorMessage('Missing QR code or product data.')
+			return
+		}
 
 		for (const product of productsToReorder) {
 			startTimedBusy()
 
 			try {
-				// Step 1: Get product code by EAN
 				const searchResponse = await wellaAPI.get('products/searchByEan/', {
-					params: {
-						ean: product.sku,
-						lang: 'en',
-					},
+					params: { ean: product.sku, lang: 'en' },
 				})
-
 				const productCode = searchResponse?.data?.code
-
 				if (!productCode) {
-					console.error("No Product Code Found")
 					setErrorList(prev => [...prev, product.sku])
+					setErrorMessage('Some product codes could not be found.')
 					continue
 				}
-				// Step 2: Get cart
-				const cartResponse = await wellaAPI.get(
-					'users/current/carts',
-					{
-						headers: {
-							Authorization: `Bearer ${qr}`,
-						}
-					}
-				)
+
+				const cartResponse = await wellaAPI.get('users/current/carts', {
+					headers: { Authorization: `Bearer ${qr}` },
+				})
 
 				const cartCode = cartResponse?.data?.carts?.[0]?.code
 				if (!cartCode) {
-					console.error('No Cart Found.')
-					// TODO: set error message
+					setErrorMessage('No cart found for the user.')
 					return
 				}
 
-				// Step 3: Add product to cart
 				const addResponse = await wellaAPI.post(
 					`users/current/carts/${cartCode}/entries`,
+					{ product: { code: productCode }, quantity: product.reorderQuantity },
 					{
-						product: {
-							code: productCode,
-
-						},
-						quantity: product.reorderQuantity
-					},
-					{
-						params: {
-							fields: 'FULL'
-						},
+						params: { fields: 'FULL' },
 						headers: {
 							Authorization: `Bearer ${qr}`,
 							Cookie: 'ROUTE=.api-75fbd89c5-ldw5n',
@@ -157,41 +133,15 @@ export default function AddToCartScreen() {
 
 				if (addResponse.status !== 200) {
 					setErrorList(prev => [...prev, product.sku])
+					setErrorMessage('Some products could not be added to the cart.')
 				}
 			} catch (err) {
 				const error = err as AxiosError
-
-				// Log full request URL (with query params)
-				if (error.config) {
-					const { baseURL = '', url = '', params } = error.config
-					const method = error.config.method?.toUpperCase() || 'UNKNOWN'
-
-					const queryString = params
-						? '?' + new URLSearchParams(params as Record<string, string>).toString()
-						: ''
-
-					const fullUrl = `${baseURL}${url}${queryString}`
-					console.error(`${method} ${fullUrl}`)
-				}
-
-				// Log Authorization header
-				if (error.config && error.config.headers) {
-					const headers = error.config.headers
-					const auth =
-						headers['Authorization'] ||
-						headers?.common?.Authorization ||
-						headers?.post?.Authorization ||
-						headers?.authorization
-				}
-
-				// Log the server's response body
-				console.error('Response body:', error.response?.data)
 				setErrorList(prev => [...prev, product.sku])
+				setErrorMessage('An error occurred while adding products to the cart.')
+				console.error('Error details:', error?.response?.data)
 			} finally {
 				stopBusy()
-				setTimeout(()=> {
-					if (errorList.length) console.error(`Some products did not update in Wella Cart: ${errorList}`)
-				})
 			}
 		}
 		setCompleted(true)
@@ -199,7 +149,6 @@ export default function AddToCartScreen() {
 
 	const handleDeleteAndClose = async (): Promise<void> => {
 		if (!id) return
-
 		startTimedBusy()
 		try {
 			await handleAPIRequest({
@@ -208,32 +157,25 @@ export default function AddToCartScreen() {
 			})
 		} catch (error) {
 			console.error('Error deleting list:', error)
+			setErrorMessage('Could not delete list.')
 		} finally {
 			stopBusy()
 			router.replace('/lists')
 		}
 	}
 
-	if (!permission) {
-		// Camera permissions are still loading.
-		return <View />
-	}
+	if (!permission) return <View />
 
 	if (!permission.granted) {
-		// Camera permissions are not granted.
 		return <View>
 			<ThemedView style={styles.titleContainer}>
 				<ThemedText type="title">Wella Product Uploader</ThemedText>
 			</ThemedView>
 			<ThemedView style={styles.stepContainer}>
-				<ThemedText
-					type="subtitle">{'Please allow camera permissions to app in order to continue.'}</ThemedText>
+				<ThemedText type="subtitle">Please allow camera permissions to app in order to continue.</ThemedText>
 			</ThemedView>
 			<ThemedView style={styles.stepContainer}>
-				<Button
-					title={'grant permission'}
-					onPress={requestPermission}
-				/>
+				<Button title={'grant permission'} onPress={requestPermission} />
 			</ThemedView>
 		</View>
 	}
@@ -242,71 +184,39 @@ export default function AddToCartScreen() {
 		<View style={styles.mainViewStyle}>
 			<View style={styles.headerComponentStyle}>
 				<View style={styles.wellaImageContainer}>
-					<Image
-						source={IMAGES.APP_LOGO}
-						style={styles.wellaLogoLocal}
-					/>
+					<Image source={IMAGES.APP_LOGO} style={styles.wellaLogoLocal} />
 				</View>
 			</View>
-			<ThemedText type={'title'} style={styles.titleStyle}> Wella Product Uploader</ThemedText>
+			<ThemedText type={'title'} style={styles.titleStyle}>Wella Product Uploader</ThemedText>
+			{errorMessage ? <ThemedText type={'default'} style={{ color: 'red', textAlign: 'center' }}>{errorMessage}</ThemedText> : null}
 			{!qr
 				? <View>
-					<ThemedText type={'subtitle'} style={styles.titleStyle}> Please scan the QR code for Wella Login
-						Info</ThemedText>
+					<ThemedText type={'subtitle'} style={styles.titleStyle}>Please scan the QR code for Wella Login Info</ThemedText>
 					<View style={styles.cameraContainerStyle}>
 						<GestureDetector gesture={tap}>
 							<CameraView
 								style={styles.camera}
 								facing={'back'}
 								autofocus={isRefreshing ? 'off' : 'on'}
-								barcodeScannerSettings={{
-									barcodeTypes: ['qr'],
-								}}
-								onBarcodeScanned={(scanningResult) => {
-									setQR(scanningResult.data)
-								}}
+								barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+								onBarcodeScanned={(scanningResult) => setQR(scanningResult.data)}
 							/>
 						</GestureDetector>
 					</View>
-					<Button
-						title="Go to Wella Site to get QR Image"
-						onPress={() => {
-							Linking.openURL('https://us.wella.professionalstore.com/')
-						}}
-						containerStyle={{ marginTop: 20 }}
-						buttonStyle={styles.scanButton}
-					/>
-					<Button
-						title="Upload QR Image"
-						onPress={handlePickImageAndDecode}
-						containerStyle={{ marginTop: 20 }}
-						buttonStyle={styles.scanButton}
-					/>
+					<Button title="Go to Wella Site to get QR Image" onPress={() => Linking.openURL('https://us.wella.professionalstore.com/')} containerStyle={{ marginTop: 20 }} buttonStyle={styles.scanButton} />
+					<Button title="Upload QR Image" onPress={handlePickImageAndDecode} containerStyle={{ marginTop: 20 }} buttonStyle={styles.scanButton} />
 				</View>
 				: <View>
-					{
-						!completed
-							? <View>
-								<ThemedText type={'title'} style={styles.titleStyle}>QR Code Scanned and ready.</ThemedText>
-								<Button
-									title="Send to Wella Cart"
-									onPress={handleSendToCart}
-									containerStyle={{ marginTop: 50 }}
-									buttonStyle={styles.scanButton}
-								/>
+					{!completed
+						? <View>
+							<ThemedText type={'title'} style={styles.titleStyle}>QR Code Scanned and ready.</ThemedText>
+							<Button title="Send to Wella Cart" onPress={handleSendToCart} containerStyle={{ marginTop: 50 }} buttonStyle={styles.scanButton} />
 						</View>
-							: <View>
-								<ThemedText type={'title'} style={styles.titleStyle}>Wella Cart Updated.</ThemedText>
-								<Button
-									title="Delete List and Return"
-									onPress={handleDeleteAndClose}
-									containerStyle={{ marginTop: 50 }}
-									buttonStyle={styles.scanButton}
-								/>
-							</View>
-					}
-				</View>
-			}
+						: <View>
+							<ThemedText type={'title'} style={styles.titleStyle}>Wella Cart Updated.</ThemedText>
+							<Button title="Delete List and Return" onPress={handleDeleteAndClose} containerStyle={{ marginTop: 50 }} buttonStyle={styles.scanButton} />
+						</View>}
+				</View>}
 		</View>
 	)
 }
