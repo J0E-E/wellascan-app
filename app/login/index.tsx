@@ -13,6 +13,7 @@ import { signUp, signIn, getAPIError, handleAPIRequest, getLists } from '@/api/d
 import { useBusy } from '@/hooks/useBusy'
 import ErrorText from '@/components/ui/ErrorText'
 import globalStyles from '@/styles/global'
+import { IMAGES } from '@/constants/images'
 
 export default function LoginScreen() {
 	const { startTimedBusy, stopBusy } = useBusy()
@@ -50,7 +51,7 @@ export default function LoginScreen() {
 			onErrorMessage: setErrorText,
 			router,
 		})
-		console.log('here')
+
 		if (loginResponse?.data) {
 			setAuth(loginResponse.data)
 		}
@@ -60,7 +61,6 @@ export default function LoginScreen() {
 
 	useEffect(() => {
 		if (authState.token) {
-			console.log(authState.token)
 			router.replace('/(tabs)')
 		}
 	}, [authState])
@@ -69,7 +69,7 @@ export default function LoginScreen() {
 		headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
 		headerImage={
 			<Image
-				source={require('@/assets/images/wella.png')}
+				source={IMAGES.APP_LOGO}
 				style={styles.wellaLogo}
 			/>
 		}

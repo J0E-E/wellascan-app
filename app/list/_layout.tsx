@@ -9,5 +9,6 @@ export default function ListLayout() {
 				title: 'List View'
 			}}
 		/>
+		<Stack.Screen name="[id]/addtocart" options={{ title: "Add to Cart" }} />
 	</Stack>;
 }

@@ -14,12 +14,12 @@ import { useBusy } from '@/hooks/useBusy'
 import globalStyles from '@/styles/global'
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router'
 import { addProduct, getLists, handleAPIRequest } from '@/api/db'
-import { Dropdown } from 'react-native-element-dropdown'
 import { ListObject } from '@/types'
 import { Gesture, GestureDetector, } from 'react-native-gesture-handler'
 import { useAutofocus } from '@/hooks/useAutoFocus'
 import ListDropdown from '@/components/barcode/ListDropdown'
 import ScanResultCard from '@/components/barcode/ScanResultCard'
+import { IMAGES } from '@/constants/images'
 
 const scannerSound = require('../../assets/sounds/scanner-beep.mp3')
 
@@ -39,7 +39,7 @@ export default function BarcodeScreen() {
 	const [reload, setReload] = useState(true)
 	const [lists, setLists] = useState<ListObject[]>([])
 
-	const tap = Gesture.Tap().onBegin(onTap)
+	const tap = Gesture.Tap().onBegin(onTap).runOnJS(true)
 
 	useEffect(() => {
 		// Re-fetch Re-render trigger for the screen.
@@ -95,7 +95,7 @@ export default function BarcodeScreen() {
 		const getUPCDetails = async () => {
 			try {
 				startTimedBusy()
-				const response = await wellaAPI.get('searchByEan/', {
+				const response = await wellaAPI.get('products/searchByEan/', {
 					params: {
 						ean: sku,
 						lang: 'en',
@@ -108,7 +108,7 @@ export default function BarcodeScreen() {
 					stopBusy()
 				}
 			} catch (error) {
-				console.log(error)
+				console.error(error)
 				stopBusy()
 			}
 
@@ -148,7 +148,7 @@ export default function BarcodeScreen() {
 			headerBackgroundColor={{ light: 'rgb(21, 23, 24)', dark: 'rgb(21, 23, 24)' }}
 			headerImage={
 				<Image
-					source={require('@/assets/images/wella.png')}
+					source={IMAGES.APP_LOGO}
 					style={styles.wellaLogo}
 				/>
 			}>
@@ -173,7 +173,7 @@ export default function BarcodeScreen() {
 			headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
 			headerImage={
 				<Image
-					source={require('@/assets/images/wella.png')}
+					source={IMAGES.APP_LOGO}
 					style={styles.wellaLogo}
 				/>
 			}>

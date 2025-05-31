@@ -10,7 +10,7 @@ import { ProductObject } from '@/types'
 import ProductComponent from '@/components/product/ProductComponent'
 
 export default function ListScreen() {
-	const { id }: { id: string } = useLocalSearchParams()
+	const { id } = useLocalSearchParams() as { id: string }
 	const [reload, setReload] = useState(true)
 	const [listName, setListName] = useState('')
 	const [products, setProducts] = useState([])
@@ -54,6 +54,7 @@ export default function ListScreen() {
 					{listName}
 				</ThemedText>
 				<Pressable style={styles.editButton} onPress={() => console.log('EDIT')}>
+					{/* TODO: Add list name editing feature. */}
 					<IconSymbol size={20} name="pencil" color={color} />
 				</Pressable>
 			</View>
@@ -87,6 +88,14 @@ export default function ListScreen() {
 				titleStyle={styles.scanButtonTitle}
 			/>
 
+			<Button
+				title="Send to Wella Shopping Cart"
+				onPress={() => router.replace(`/list/${id}/addtocart`)}
+				containerStyle={{ marginTop: 20 }}
+				buttonStyle={styles.scanButton}
+				titleStyle={styles.scanButtonTitle}
+			/>
+
 			<View style={styles.footerSpacing} />
 		</View>
 	)
@@ -99,7 +108,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		paddingTop: 40,
 	},
-
 	titleRow: {
 		flexDirection: 'row',
 		alignItems: 'center',
@@ -107,19 +115,16 @@ const styles = StyleSheet.create({
 		gap: 8,
 		marginBottom: 20,
 	},
-
 	titleText: {
 		fontSize: 24,
 		fontWeight: 'bold',
 		color: 'white',
 	},
-
 	editButton: {
 		backgroundColor: '#2a2a2a',
 		padding: 8,
 		borderRadius: 6,
 	},
-
 	productsContainer: {
 		flex: 1,
 		width: '100%',
@@ -129,33 +134,28 @@ const styles = StyleSheet.create({
 		padding: 10,
 		marginBottom: 20,
 	},
-
 	productCard: {
 		backgroundColor: '#1e1e1e',
 		borderRadius: 12,
 		padding: 16,
 		marginBottom: 12,
 	},
-
 	emptyText: {
 		color: '#777',
 		textAlign: 'center',
 		fontSize: 18,
 		marginTop: 100,
 	},
-
 	scanButton: {
 		backgroundColor: '#cc1a1a',
 		borderRadius: 10,
 		paddingVertical: 14,
 	},
-
 	scanButtonTitle: {
 		color: '#fff',
 		fontWeight: 'bold',
 		fontSize: 16,
 	},
-
 	footerSpacing: {
 		height: 30,
 	},

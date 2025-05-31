@@ -10,6 +10,7 @@ import ErrorText from '@/components/ui/ErrorText'
 import { useFocusEffect, useRouter } from 'expo-router'
 import ListComponent from '@/components/list/ListComponent'
 import { ListObject } from '@/types'
+import { IMAGES } from '@/constants/images'
 
 export default function ListsScreen() {
 	const { startTimedBusy, stopBusy } = useBusy()
@@ -84,7 +85,7 @@ export default function ListsScreen() {
 		<View style={styles.headerComponentStyle}>
 			<View style={styles.wellaImageContainer}>
 				<Image
-					source={require('@/assets/images/wella.png')}
+					source={IMAGES.APP_LOGO}
 					style={styles.wellaLogoLocal}
 				/>
 			</View>
@@ -186,12 +187,4 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		paddingVertical: 12,
 	},
-	// flatListContainerStyle: {
-	// 	flex: 1,
-	// },
-	// flatListContentContainerStyle: {
-	// 	padding: 16,
-	// 	backgroundColor: '#121212',
-	// 	gap: 12, // adds spacing between list items
-	// },
 })
