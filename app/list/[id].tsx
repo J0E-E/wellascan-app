@@ -1,23 +1,29 @@
 import { View, StyleSheet, FlatList, Pressable } from 'react-native'
-import { ThemedText } from '@/components/ThemedText'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
-import { getLists, handleAPIRequest } from '@/api/db'
-import { useThemeColor } from '@/hooks/useThemeColor'
 import { Button } from 'react-native-elements'
+
+import { ThemedText } from '@/components/ThemedText'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { ProductObject } from '@/types'
 import ProductComponent from '@/components/product/ProductComponent'
+
+import { useThemeColor } from '@/hooks/useThemeColor'
+
+import { getLists, handleAPIRequest } from '@/api/db'
+
+import { ProductObject } from '@/types'
 
 export default function ListScreen() {
 	const { id } = useLocalSearchParams() as { id: string }
 	const [reload, setReload] = useState(true)
 	const [listName, setListName] = useState('')
-	const [products, setProducts] = useState([])
+	const [products, setProducts] = useState<ProductObject[]>([])
+	const [errorMessage, setErrorMessage] = useState('')
 	const router = useRouter()
 
 	const color = useThemeColor({ light: 'black', dark: 'white' }, 'text')
 
+	// Reload lists on focus of screen
 	useFocusEffect(
 		useCallback(() => {
 			setReload(true)
@@ -25,6 +31,7 @@ export default function ListScreen() {
 		}, []),
 	)
 
+	// Pull lists from DB
 	useEffect(() => {
 		if (!reload) return
 
@@ -58,14 +65,22 @@ export default function ListScreen() {
 					<IconSymbol size={20} name="pencil" color={color} />
 				</Pressable>
 			</View>
-
+			{errorMessage ? (
+				<ThemedText style={styles.errorMessage} type="default">
+					{errorMessage}
+				</ThemedText>
+			) : null}
 			<View style={styles.productsContainer}>
 				<FlatList
 					data={products}
 					keyExtractor={(product: ProductObject) => product._id}
 					renderItem={({ item }) => (
 						<View style={styles.productCard}>
-							<ProductComponent product={item} reloadCallback={() => setReload(true)} />
+							<ProductComponent
+								product={item}
+								reloadCallback={() => setReload(true)}
+								onSetErrorMessage={setErrorMessage}
+							/>
 						</View>
 					)}
 					ListEmptyComponent={
@@ -158,5 +173,11 @@ const styles = StyleSheet.create({
 	},
 	footerSpacing: {
 		height: 30,
+	},
+	errorMessage: {
+		color: '#ff5c5c',
+		marginBottom: 10,
+		textAlign: 'center',
+		fontSize: 14,
 	},
 })

@@ -1,5 +1,6 @@
 import axios, { AxiosResponse, HttpStatusCode } from 'axios'
 import { useRouter } from 'expo-router'
+
 import { clearAuthState, getAuthState, getContextAuthHandlers, setAuthState } from '@/context/auth/authSync'
 
 const { setAuthFn, unsetAuthFn } = getContextAuthHandlers()

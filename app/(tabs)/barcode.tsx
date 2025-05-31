@@ -1,24 +1,27 @@
-import { StyleSheet, View, Text } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { Button } from 'react-native-elements'
 import { useAudioPlayer } from 'expo-audio'
-
-import { ThemedText } from '@/components/ThemedText'
-import { ThemedView } from '@/components/ThemedView'
-import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { Image } from 'expo-image'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useCallback, useEffect, useRef, useState } from 'react'
-
-import wellaAPI from '@/api/wella'
-import { useBusy } from '@/hooks/useBusy'
-import globalStyles from '@/styles/global'
-import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router'
-import { addProduct, getLists, handleAPIRequest } from '@/api/db'
-import { ListObject } from '@/types'
 import { Gesture, GestureDetector, } from 'react-native-gesture-handler'
-import { useAutofocus } from '@/hooks/useAutoFocus'
+
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router'
+import { ThemedText } from '@/components/ThemedText'
+import { ThemedView } from '@/components/ThemedView'
+
 import ListDropdown from '@/components/barcode/ListDropdown'
 import ScanResultCard from '@/components/barcode/ScanResultCard'
+import ParallaxScrollView from '@/components/ParallaxScrollView'
+
+import { useBusy } from '@/hooks/useBusy'
+import { useAutofocus } from '@/hooks/useAutoFocus'
+
+import wellaAPI from '@/api/wella'
+import { addProduct, getLists, handleAPIRequest } from '@/api/db'
+
+import { ListObject } from '@/types'
+import globalStyles from '@/styles/global'
 import { IMAGES } from '@/constants/images'
 
 const scannerSound = require('../../assets/sounds/scanner-beep.mp3')
@@ -41,8 +44,8 @@ export default function BarcodeScreen() {
 
 	const tap = Gesture.Tap().onBegin(onTap).runOnJS(true)
 
+	// Re-fetch Re-render trigger for the screen.
 	useEffect(() => {
-		// Re-fetch Re-render trigger for the screen.
 		if (!reload) return
 
 		(async () => {
@@ -59,6 +62,7 @@ export default function BarcodeScreen() {
 		})()
 	}, [reload])
 
+	// Set selected list if passed in params or previously selected.
 	useEffect(() => {
 		if (
 			listId &&
@@ -73,8 +77,8 @@ export default function BarcodeScreen() {
 		}
 	}, [listId, lists])
 
+	// Triggers re-fetch and render when screen regains focus
 	useFocusEffect(
-		// Triggers re-fetch and render when screen regains focus.
 		useCallback(() => {
 			setReload(true)
 			resetState()
@@ -82,6 +86,7 @@ export default function BarcodeScreen() {
 		}, []),
 	)
 
+	// Reset the state of the screen
 	const resetState = () => {
 		setProduct('')
 		setSku('')
@@ -89,6 +94,7 @@ export default function BarcodeScreen() {
 		scannerSoundPlayer.seekTo(0)
 	}
 
+	// Get wella product information from the scanned sku
 	useEffect(() => {
 		if (!sku) return
 
@@ -116,6 +122,7 @@ export default function BarcodeScreen() {
 		getUPCDetails()
 	}, [sku])
 
+	// Add product to selected list if found
 	useEffect(() => {
 		if (!product || !selectedList) return
 
