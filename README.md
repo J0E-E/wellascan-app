@@ -1,4 +1,5 @@
-![WellaScan Logo](./assets/images/wellascan.png)
+
+<img src="./assets/images/wellascan.png" alt="WellaScan Logo" width="200"/>
 
 # WellaScan
 
