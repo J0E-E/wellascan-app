@@ -115,7 +115,6 @@ export type APIError = {
 }
 
 export const getAPIError = (error: unknown): APIError => {
-	console.error(error)
 	if (axios.isAxiosError(error) && error.response) {
 		const data = error.response.data as { error?: string; message?: string }
 		const isUnauthorized = error.response.status === HttpStatusCode.Unauthorized
