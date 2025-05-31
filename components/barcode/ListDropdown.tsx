@@ -2,29 +2,33 @@ import { Dropdown } from 'react-native-element-dropdown'
 import { StyleSheet, Text, View } from 'react-native'
 import { ListObject } from '@/types'
 
-export default function ListDropdown({ lists, selectedList, onChange }: {
-	lists: ListObject[],
-	selectedList: ListObject | undefined,
+interface ListDropdownProps {
+	lists: ListObject[]
+	selectedList: ListObject | undefined
 	onChange: (item: any) => void
-}) {
-	return <View style={styles.dropdownContainerStyle}>
-		<Text style={styles.label}>Product List</Text>
-		<Dropdown
-			style={[styles.dropdown, { width: '100%' }]}
-			placeholder={'Select A List'}
-			placeholderStyle={styles.placeholderStyle}
-			containerStyle={styles.containerStyle}
-			itemTextStyle={styles.itemTextStyle}
-			itemContainerStyle={styles.itemContainerStyle}
-			selectedTextStyle={styles.selectedTextStyle}
-			activeColor={'#cc1a1a'}
-			data={lists}
-			onChange={(item) => onChange(item)}
-			value={selectedList}
-			labelField={'name'}
-			valueField={'_id'}
-		/>
-	</View>
+}
+
+export default function ListDropdown({ lists, selectedList, onChange }: ListDropdownProps) {
+	return (
+		<View style={styles.dropdownContainerStyle}>
+			<Text style={styles.label}>Product List</Text>
+			<Dropdown
+				style={[styles.dropdown, { width: '100%' }]}
+				placeholder={'Select A List'}
+				placeholderStyle={styles.placeholderStyle}
+				containerStyle={styles.containerStyle}
+				itemTextStyle={styles.itemTextStyle}
+				itemContainerStyle={styles.itemContainerStyle}
+				selectedTextStyle={styles.selectedTextStyle}
+				activeColor={'#cc1a1a'}
+				data={lists}
+				onChange={(item) => onChange(item)}
+				value={selectedList}
+				labelField={'name'}
+				valueField={'_id'}
+			/>
+		</View>
+	)
 }
 
 const styles = StyleSheet.create({

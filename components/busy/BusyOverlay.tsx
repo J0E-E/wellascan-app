@@ -3,7 +3,7 @@ import React from "react";
 import {ActivityIndicator, Dimensions, StyleSheet, View} from "react-native";
 import {useBusy} from "@/hooks/useBusy";
 
-const BusyOverlay = () => {
+export default function BusyOverlay() {
     const {state: busyState} = useBusy()
 
     if (!busyState.isActive) return null
@@ -30,5 +30,3 @@ const styles = StyleSheet.create({
         elevation: 10
     }
 })
-
-export default BusyOverlay

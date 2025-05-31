@@ -14,14 +14,14 @@ import { getLists, handleAPIRequest } from '@/api/db'
 import { ProductObject } from '@/types'
 
 export default function ListScreen() {
+	const color = useThemeColor({ light: 'black', dark: 'white' }, 'text')
 	const { id } = useLocalSearchParams() as { id: string }
+	const router = useRouter()
+
 	const [reload, setReload] = useState(true)
 	const [listName, setListName] = useState('')
 	const [products, setProducts] = useState<ProductObject[]>([])
 	const [errorMessage, setErrorMessage] = useState('')
-	const router = useRouter()
-
-	const color = useThemeColor({ light: 'black', dark: 'white' }, 'text')
 
 	// Reload lists on focus of screen
 	useFocusEffect(

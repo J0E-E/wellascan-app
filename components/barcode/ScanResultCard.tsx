@@ -10,13 +10,7 @@ type ScanResultCardProps = {
 	onViewList: () => void
 }
 
-export default function ScanResultCard({
-										   sku,
-										   product,
-										   message,
-										   onScanNext,
-										   onViewList,
-									   }: ScanResultCardProps) {
+export default function ScanResultCard({ sku, product, message, onScanNext, onViewList }: ScanResultCardProps) {
 	return (
 		<View style={styles.card}>
 			<View style={styles.textContainer}>
@@ -28,9 +22,7 @@ export default function ScanResultCard({
 				<ThemedText type="subtitle" style={styles.label}>
 					Product:
 				</ThemedText>
-				<ThemedText style={styles.value}>
-					{product || 'No product found with that SKU'}
-				</ThemedText>
+				<ThemedText style={styles.value}>{product || 'No product found with that SKU'}</ThemedText>
 
 				<ThemedText type="subtitle" style={styles.label}>
 					Status:

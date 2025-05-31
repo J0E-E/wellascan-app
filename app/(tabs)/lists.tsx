@@ -1,26 +1,30 @@
 import { StyleSheet, View, FlatList } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import { Image } from 'expo-image'
-import globalStyles from '@/styles/global'
-import { useCallback, useEffect, useState } from 'react'
-import { ThemedText } from '@/components/ThemedText'
-import { addList, getLists, handleAPIRequest } from '@/api/db'
-import { useBusy } from '@/hooks/useBusy'
-import ErrorText from '@/components/ui/ErrorText'
 import { useFocusEffect, useRouter } from 'expo-router'
+import { useCallback, useEffect, useState } from 'react'
+
+import { ThemedText } from '@/components/ThemedText'
+import ErrorText from '@/components/ui/ErrorText'
 import ListComponent from '@/components/list/ListComponent'
+
+import { useBusy } from '@/hooks/useBusy'
+
+import { addList, getLists, handleAPIRequest } from '@/api/db'
+
 import { ListObject } from '@/types'
+
+import globalStyles from '@/styles/global'
 import { IMAGES } from '@/constants/images'
 
 export default function ListsScreen() {
 	const { startTimedBusy, stopBusy } = useBusy()
 	const router = useRouter()
 
-	const [errorText, setErrorText] = useState('')	// UI error message
-	const [lists, setLists] = useState([])			// Fetched list data
-	const [reload, setReload] = useState(true)		// Triggers re-fetch and render when true
-	const [name, setName] = useState('')			// Input value for new list
-
+	const [errorText, setErrorText] = useState('')
+	const [lists, setLists] = useState([])
+	const [reload, setReload] = useState(true)
+	const [name, setName] = useState('')
 
 	const handleCreateListClick = async () => {
 		// Handles the creation of a new list.
@@ -61,7 +65,6 @@ export default function ListsScreen() {
 		setErrorText('')
 
 		const listAPI = async () => {
-
 			startTimedBusy()
 			// GET list data
 			const getListResponse = await handleAPIRequest({
@@ -80,51 +83,39 @@ export default function ListsScreen() {
 		listAPI()
 	}, [reload])
 
-
-	return <View style={{ flex: 1 }}>
-		<View style={styles.headerComponentStyle}>
-			<View style={styles.wellaImageContainer}>
-				<Image
-					source={IMAGES.APP_LOGO}
-					style={styles.wellaLogoLocal}
-				/>
+	return (
+		<View style={{ flex: 1 }}>
+			<View style={styles.headerComponentStyle}>
+				<View style={styles.wellaImageContainer}>
+					<Image source={IMAGES.APP_LOGO} style={styles.wellaLogoLocal} />
+				</View>
+				<View style={styles.inputRow}>
+					<Input
+						placeholder="Add New List"
+						autoCapitalize="words"
+						value={name}
+						onChangeText={setName}
+						onSubmitEditing={handleCreateListClick}
+						placeholderTextColor="#888"
+						inputStyle={styles.input}
+						containerStyle={styles.inputContainer}
+					/>
+					<Button title="+" onPress={handleCreateListClick} buttonStyle={styles.addButton} />
+				</View>
+				<ErrorText message={errorText} />
 			</View>
-			<View style={styles.inputRow}>
-				<Input
-					placeholder="Add New List"
-					autoCapitalize="words"
-					value={name}
-					onChangeText={setName}
-					onSubmitEditing={handleCreateListClick}
-					placeholderTextColor="#888"
-					inputStyle={styles.input}
-					containerStyle={styles.inputContainer}
-				/>
-				<Button
-					title="+"
-					onPress={handleCreateListClick}
-					buttonStyle={styles.addButton}
-				/>
-			</View>
-			<ErrorText message={errorText} />
+			<FlatList
+				style={styles.flatListContainerStyle}
+				data={lists}
+				keyExtractor={(list: ListObject) => list._id || list.name}
+				renderItem={({ item }) => (
+					<ListComponent listItem={item} setReload={setReload} setErrorText={setErrorText} />
+				)}
+				contentContainerStyle={styles.flatListContentContainerStyle}
+				ListEmptyComponent={<ThemedText type={'title'}>No lists found.</ThemedText>}
+			/>
 		</View>
-		<FlatList
-			style={styles.flatListContainerStyle}
-			data={lists}
-			keyExtractor={(list: ListObject) => list._id || list.name}
-			renderItem={({ item }) => (
-				<ListComponent
-					listItem={item}
-					setReload={setReload}
-					setErrorText={setErrorText}
-				/>
-			)}
-			contentContainerStyle={styles.flatListContentContainerStyle}
-			ListEmptyComponent={
-				<ThemedText type={'title'}>No lists found.</ThemedText>
-			}
-		/>
-	</View>
+	)
 }
 
 const styles = StyleSheet.create({

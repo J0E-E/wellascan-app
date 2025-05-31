@@ -1,49 +1,54 @@
-import { ThemedText } from '@/components/ThemedText'
 import React, { Dispatch } from 'react'
 import { View, StyleSheet, Pressable } from 'react-native'
-import { IconSymbol } from '@/components/ui/IconSymbol'
-import { useThemeColor } from '@/hooks/useThemeColor'
-import { deleteList, handleAPIRequest } from '@/api/db'
 import { useRouter } from 'expo-router'
+
+import { ThemedText } from '@/components/ThemedText'
+import { IconSymbol } from '@/components/ui/IconSymbol'
+
+import { useThemeColor } from '@/hooks/useThemeColor'
+
+import { deleteList, handleAPIRequest } from '@/api/db'
+
 import { ListObject } from '@/types'
 
-export default function ListComponent({ listItem, setReload, setErrorText }: {
-	listItem: ListObject,
-	setReload: Dispatch<React.SetStateAction<boolean>>,
+interface ListComponentProps {
+	listItem: ListObject
+	setReload: Dispatch<React.SetStateAction<boolean>>
 	setErrorText: Dispatch<React.SetStateAction<string>>
-}) {
+}
+
+export default function ListComponent({ listItem, setReload, setErrorText }: ListComponentProps) {
 	const color = useThemeColor({ light: 'black', dark: 'white' }, 'text')
 	const router = useRouter()
 
 	const handleDelete = async () => {
-
 		const deleteResponse = await handleAPIRequest({
 			request: () => deleteList(listItem._id),
 			onErrorMessage: (message) => setErrorText(message),
-			router
+			router,
 		})
 
 		setReload(!!deleteResponse)
 	}
 
-	return <View style={styles.containerStyle}>
-		<Pressable
-			style={styles.detailContainerStyle}
-			onPress={() => {
-				router.setParams({ listName: listItem.name })
-				router.push(`/list/${listItem._id}`)
-			}}
-		>
-			<View>
-				<ThemedText type={'title'}>{listItem.name}</ThemedText>
-			</View>
-		</Pressable>
-		<Pressable
-			style={styles.deleteContainerStyle}
-			onPress={handleDelete}>
-			<IconSymbol size={28} name="trash" color={color} />
-		</Pressable>
-	</View>
+	return (
+		<View style={styles.containerStyle}>
+			<Pressable
+				style={styles.detailContainerStyle}
+				onPress={() => {
+					router.setParams({ listName: listItem.name })
+					router.push(`/list/${listItem._id}`)
+				}}
+			>
+				<View>
+					<ThemedText type={'title'}>{listItem.name}</ThemedText>
+				</View>
+			</Pressable>
+			<Pressable style={styles.deleteContainerStyle} onPress={handleDelete}>
+				<IconSymbol size={28} name="trash" color={color} />
+			</Pressable>
+		</View>
+	)
 }
 
 const styles = StyleSheet.create({
@@ -53,7 +58,7 @@ const styles = StyleSheet.create({
 		borderColor: '#434343',
 		borderWidth: 1,
 		marginVertical: 3,
-		backgroundColor: 'black'
+		backgroundColor: 'black',
 	},
 	detailContainerStyle: {
 		borderWidth: 1,
@@ -64,6 +69,6 @@ const styles = StyleSheet.create({
 	},
 	deleteContainerStyle: {
 		justifyContent: 'center',
-		marginHorizontal: 5
+		marginHorizontal: 5,
 	},
 })
