@@ -1,3 +1,5 @@
+![WellaScan Logo](./assets/images/wellascan.png)
+
 # WellaScan
 
 WellaScan is a React Native app designed to streamline the product reordering process for salon professionals who use
