@@ -1,6 +1,6 @@
-import { StyleSheet, View } from 'react-native'
+import { Linking, StyleSheet, View } from 'react-native'
 import { ThemedText } from '@/components/ThemedText'
-import { CameraView, useCameraPermissions } from 'expo-camera'
+import { Camera, CameraView, useCameraPermissions } from 'expo-camera'
 import { Image } from 'expo-image'
 import { ThemedView } from '@/components/ThemedView'
 import { Button } from 'react-native-elements'
@@ -14,6 +14,8 @@ import { useBusy } from '@/hooks/useBusy'
 import { ListObject, ProductObject } from '@/types'
 import wellaAPI from '@/api/wella'
 import { IMAGES } from '@/constants/images'
+import * as ImagePicker from 'expo-image-picker';
+import { AxiosError } from 'axios'
 
 export default function AddToCartScreen() {
 	const router = useRouter()
@@ -68,6 +70,30 @@ export default function AddToCartScreen() {
 		}
 	}, [id, lists])
 
+
+	const handlePickImageAndDecode = async (): Promise<void> => {
+		try {
+			const result = await ImagePicker.launchImageLibraryAsync({
+				mediaTypes: ['images'],
+				allowsEditing: false,
+				quality: 1,
+			})
+
+			if (result.canceled || result.assets.length === 0) return
+
+			const uri = result.assets[0].uri
+			const scanned = await Camera.scanFromURLAsync(uri, ['qr'])
+
+			if (scanned.length > 0) {
+				setQR(scanned[0].data)
+			} else {
+				console.error('No QR code found in image')
+			}
+		} catch (err) {
+			console.error('Failed to scan QR from image:', err)
+		}
+	}
+
 	const handleSendToCart = async (): Promise<void> => {
 		if (!qr || !productsToReorder) return // TODO: show error message
 
@@ -83,18 +109,36 @@ export default function AddToCartScreen() {
 					},
 				})
 
-				const code = searchResponse?.data?.code
-				if (!code) {
+				const productCode = searchResponse?.data?.code
+
+				if (!productCode) {
+					console.error("No Product Code Found")
 					setErrorList(prev => [...prev, product.sku])
 					continue
 				}
+				// Step 2: Get cart
+				const cartResponse = await wellaAPI.get(
+					'users/current/carts',
+					{
+						headers: {
+							Authorization: `Bearer ${qr}`,
+						}
+					}
+				)
 
-				// Step 2: Add product to cart
+				const cartCode = cartResponse?.data?.carts?.[0]?.code
+				if (!cartCode) {
+					console.error('No Cart Found.')
+					// TODO: set error message
+					return
+				}
+
+				// Step 3: Add product to cart
 				const addResponse = await wellaAPI.post(
-					'users/current/carts/12838348/entries',
+					`users/current/carts/${cartCode}/entries`,
 					{
 						product: {
-							code,
+							code: productCode,
 
 						},
 						quantity: product.reorderQuantity
@@ -110,10 +154,38 @@ export default function AddToCartScreen() {
 						}
 					}
 				)
+
 				if (addResponse.status !== 200) {
 					setErrorList(prev => [...prev, product.sku])
 				}
 			} catch (err) {
+				const error = err as AxiosError
+
+				// Log full request URL (with query params)
+				if (error.config) {
+					const { baseURL = '', url = '', params } = error.config
+					const method = error.config.method?.toUpperCase() || 'UNKNOWN'
+
+					const queryString = params
+						? '?' + new URLSearchParams(params as Record<string, string>).toString()
+						: ''
+
+					const fullUrl = `${baseURL}${url}${queryString}`
+					console.error(`${method} ${fullUrl}`)
+				}
+
+				// Log Authorization header
+				if (error.config && error.config.headers) {
+					const headers = error.config.headers
+					const auth =
+						headers['Authorization'] ||
+						headers?.common?.Authorization ||
+						headers?.post?.Authorization ||
+						headers?.authorization
+				}
+
+				// Log the server's response body
+				console.error('Response body:', error.response?.data)
 				setErrorList(prev => [...prev, product.sku])
 			} finally {
 				stopBusy()
@@ -196,6 +268,20 @@ export default function AddToCartScreen() {
 							/>
 						</GestureDetector>
 					</View>
+					<Button
+						title="Go to Wella Site to get QR Image"
+						onPress={() => {
+							Linking.openURL('https://us.wella.professionalstore.com/')
+						}}
+						containerStyle={{ marginTop: 20 }}
+						buttonStyle={styles.scanButton}
+					/>
+					<Button
+						title="Upload QR Image"
+						onPress={handlePickImageAndDecode}
+						containerStyle={{ marginTop: 20 }}
+						buttonStyle={styles.scanButton}
+					/>
 				</View>
 				: <View>
 					{
@@ -242,7 +328,7 @@ const styles = StyleSheet.create({
 		borderColor: 'red',
 	},
 	cameraContainerStyle: {
-		height: 400,
+		height: 300,
 	},
 	mainViewStyle: {
 		flex: 1,
@@ -260,7 +346,7 @@ const styles = StyleSheet.create({
 	},
 	titleStyle: {
 		textAlign: 'center',
-		marginVertical: 25,
+		marginVertical: 10,
 	},
 	scanButton: {
 		backgroundColor: '#cc1a1a',
