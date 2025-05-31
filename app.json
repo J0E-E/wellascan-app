@@ -1,22 +1,23 @@
 {
   "expo": {
-    "name": "wella-barcode-app",
-    "slug": "wella-barcode-app",
+    "name": "WellaScan",
+    "slug": "wellascan-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "wellabarcodeapp",
+    "scheme": "wellascanapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.joeyiglesias.wellascan"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "package": "com.joeyiglesias.wellascan"
     },
     "web": {
       "bundler": "metro",
@@ -37,8 +38,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "cameraPermission": "Allow WellaScan to access your camera",
+          "microphonePermission": "Allow WellaScan to access your microphone",
           "recordAudioAndroid": true
         }
       ],
