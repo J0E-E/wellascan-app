@@ -23,6 +23,7 @@ import { ListObject } from '@/types'
 import globalStyles from '@/styles/global'
 import { IMAGES } from '@/constants/images'
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const scannerSound = require('../../assets/sounds/scanner-beep.mp3')
 
 export default function BarcodeScreen() {

@@ -1,7 +1,5 @@
 import React, {Dispatch, ReactNode, useReducer} from "react";
 
-type Reducer = <State, Action>(state: State, action: Action) => State
-
 /**
  * Helper function that binds an object of action creators to a dispatch function, facilitating the dispatch of actions
  * directly from the action creators without explicitly calling `dispatch`.

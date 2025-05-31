@@ -27,7 +27,6 @@ export default function AddToCartScreen() {
 	const [qr, setQR] = useState('')
 	const [lists, setLists] = useState<ListObject[]>([])
 	const [productsToReorder, setProductsToReorder] = useState<ProductObject[]>([])
-	const [errorList, setErrorList] = useState<string[]>([])
 	const [completed, setCompleted] = useState(false)
 	const [errorMessage, setErrorMessage] = useState('')
 
@@ -103,7 +102,6 @@ export default function AddToCartScreen() {
 				})
 				const productCode = searchResponse?.data?.code
 				if (!productCode) {
-					setErrorList(prev => [...prev, product.sku])
 					setErrorMessage('Some product codes could not be found.')
 					continue
 				}
@@ -132,12 +130,10 @@ export default function AddToCartScreen() {
 				)
 
 				if (addResponse.status !== 200) {
-					setErrorList(prev => [...prev, product.sku])
 					setErrorMessage('Some products could not be added to the cart.')
 				}
 			} catch (err) {
 				const error = err as AxiosError
-				setErrorList(prev => [...prev, product.sku])
 				setErrorMessage('An error occurred while adding products to the cart.')
 				console.error('Error details:', error?.response?.data)
 			} finally {

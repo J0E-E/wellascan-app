@@ -2,18 +2,22 @@ import { Image } from 'expo-image'
 import { Input, Button } from 'react-native-elements'
 import { StyleSheet, Pressable, Text } from 'react-native'
 import { useContext, useEffect, useState } from 'react'
+import { useRouter } from 'expo-router'
 
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
-import { AuthContext } from '@/context/auth/AuthContext'
-import { useRouter } from 'expo-router'
-import Spacer from '@/components/ui/Spacer'
-import { signUp, signIn, getAPIError, handleAPIRequest, getLists } from '@/api/db'
-import { useBusy } from '@/hooks/useBusy'
 import ErrorText from '@/components/ui/ErrorText'
-import globalStyles from '@/styles/global'
+import Spacer from '@/components/ui/Spacer'
+
+import { AuthContext } from '@/context/auth/AuthContext'
+
+import { signUp, signIn, handleAPIRequest } from '@/api/db'
+
+import { useBusy } from '@/hooks/useBusy'
+
 import { IMAGES } from '@/constants/images'
+import globalStyles from '@/styles/global'
 
 export default function LoginScreen() {
 	const { startTimedBusy, stopBusy } = useBusy()
@@ -22,7 +26,7 @@ export default function LoginScreen() {
 	const [password, setPassword] = useState('')
 	const [errorText, setErrorText] = useState('')
 	const router = useRouter()
-	const { state: authState, setAuth, unsetAuth } = useContext(AuthContext)
+	const { state: authState, setAuth } = useContext(AuthContext)
 
 	/**
 	 * Toggles the login state between sign-up and sign-in modes.

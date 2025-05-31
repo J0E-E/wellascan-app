@@ -72,9 +72,10 @@ const busyReducer = (state: BusyState, action: BusyAction): BusyState => {
             return {...defaultBusyState}
         case 'upsert_busy_message':
             return {...state, messages: {...state.messages, [action.payload.messageId]: action.payload.message}}
-        case 'delete_busy_message':
-            const {[action.payload.messageId]: _, ...remainingMessages} = state.messages
-            return {...state, messages: {...remainingMessages}}
+        case 'delete_busy_message': {
+			const { [action.payload.messageId]: _, ...remainingMessages } = state.messages
+			return { ...state, messages: { ...remainingMessages } }
+		}
         default:
             return state
     }
