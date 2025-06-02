@@ -4,5 +4,6 @@
   "trailingComma": "all",
   "tabWidth": 4,
   "useTabs": true,
-  "printWidth": 120
+  "printWidth": 160,
+  "objectWrap": "preserve"
 }
