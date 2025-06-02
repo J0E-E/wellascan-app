@@ -10,6 +10,7 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 import { deleteList, handleAPIRequest } from '@/api/db'
 
 import { ListObject } from '@/types'
+import { ROUTES } from '@/constants/routes'
 
 interface ListComponentProps {
 	listItem: ListObject
@@ -37,7 +38,7 @@ export default function ListComponent({ listItem, setReload, setErrorText }: Lis
 				style={styles.detailContainerStyle}
 				onPress={() => {
 					router.setParams({ listName: listItem.name })
-					router.push(`/list/${listItem._id}`)
+					router.push(ROUTES.LIST_DETAIL(listItem._id))
 				}}
 			>
 				<View>

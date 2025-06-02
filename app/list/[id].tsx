@@ -12,6 +12,7 @@ import { useThemeColor } from '@/hooks/useThemeColor'
 import { getLists, handleAPIRequest } from '@/api/db'
 
 import { ProductObject } from '@/types'
+import { ROUTES } from '@/constants/routes'
 
 export default function ListScreen() {
 	const color = useThemeColor({ light: 'black', dark: 'white' }, 'text')
@@ -76,11 +77,7 @@ export default function ListScreen() {
 					keyExtractor={(product: ProductObject) => product._id}
 					renderItem={({ item }) => (
 						<View style={styles.productCard}>
-							<ProductComponent
-								product={item}
-								reloadCallback={() => setReload(true)}
-								onSetErrorMessage={setErrorMessage}
-							/>
+							<ProductComponent product={item} reloadCallback={() => setReload(true)} onSetErrorMessage={setErrorMessage} />
 						</View>
 					)}
 					ListEmptyComponent={
@@ -95,7 +92,7 @@ export default function ListScreen() {
 				title="Scan Products To List"
 				onPress={() => {
 					router.navigate({
-						pathname: '/(tabs)/barcode',
+						pathname: ROUTES.BARCODE,
 						params: { listId: id, listName },
 					})
 				}}
@@ -105,7 +102,7 @@ export default function ListScreen() {
 
 			<Button
 				title="Send to Wella Shopping Cart"
-				onPress={() => router.replace(`/list/${id}/addtocart`)}
+				onPress={() => router.replace(ROUTES.ADD_TO_CART(id))}
 				containerStyle={{ marginTop: 20 }}
 				buttonStyle={styles.scanButton}
 				titleStyle={styles.scanButtonTitle}

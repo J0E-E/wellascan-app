@@ -18,6 +18,7 @@ import { useBusy } from '@/hooks/useBusy'
 
 import { IMAGES } from '@/constants/images'
 import globalStyles from '@/styles/global'
+import { ROUTES } from '@/constants/routes'
 
 export default function LoginScreen() {
 	const { startTimedBusy, stopBusy } = useBusy()
@@ -43,9 +44,9 @@ export default function LoginScreen() {
 
 		if (!email || !password) {
 			// TODO: add email field validation.
-			setErrorText('Email and password are required.');
-			stopBusy();
-			return;
+			setErrorText('Email and password are required.')
+			stopBusy()
+			return
 		}
 
 		const authFn = isSignUp ? signUp : signIn
@@ -65,68 +66,64 @@ export default function LoginScreen() {
 
 	useEffect(() => {
 		if (authState.token) {
-			router.replace('/(tabs)')
+			router.replace(ROUTES.TABS)
 		}
 	}, [authState])
 
-	return <ParallaxScrollView
-		headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-		headerImage={
-			<Image
-				source={IMAGES.APP_LOGO}
-				style={styles.wellaLogo}
-			/>
-		}
-		withTabBar={false}>
-		<ThemedView style={styles.authContainer}>
-			<ThemedText type={'title'}>{isSignUp ? 'Sign-Up' : 'Login'}</ThemedText>
-			<Spacer />
-			<Input
-				inputStyle={styles.inputStyle}
-				label={'Email'}
-				autoCapitalize={'none'}
-				autoCorrect={false}
-				value={email}
-				onChangeText={setEmail}
-				autoFocus
-			/>
-			<Spacer />
-			<Input
-				inputStyle={styles.inputStyle}
-				label={'Password'}
-				autoCapitalize={'none'}
-				autoCorrect={false}
-				secureTextEntry
-				value={password}
-				onChangeText={setPassword}
-				onSubmitEditing={handleAuth}
-			/>
-			<Spacer />
-			<Button
-				title={isSignUp ? 'Sign-Up' : 'Login'}
-				onPress={handleAuth}
-				disabled={!email || !password}
-				buttonStyle={{
-					backgroundColor: !email || !password ? '#444' : '#cc1a1a',
-					borderRadius: 8,
-					paddingVertical: 12,
-				}}
-				titleStyle={{
-					color: '#fff',
-					fontWeight: 'bold',
-					fontSize: 16,
-				}}
-			/>
-			<Spacer />
-			<Pressable
-				onPress={handleSwitchLoginState}
-			>
-				<Text style={styles.switchButtonStyle}>{isSignUp ? 'Login' : 'Sign-Up'}</Text>
-			</Pressable>
-			<Spacer />
-			<ErrorText message={errorText}/>
-		</ThemedView>
-	</ParallaxScrollView>
+	return (
+		<ParallaxScrollView
+			headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+			headerImage={<Image source={IMAGES.APP_LOGO} style={styles.wellaLogo} />}
+			withTabBar={false}
+		>
+			<ThemedView style={styles.authContainer}>
+				<ThemedText type={'title'}>{isSignUp ? 'Sign-Up' : 'Login'}</ThemedText>
+				<Spacer />
+				<Input
+					inputStyle={styles.inputStyle}
+					label={'Email'}
+					autoCapitalize={'none'}
+					autoCorrect={false}
+					value={email}
+					onChangeText={setEmail}
+					autoFocus
+				/>
+				<Spacer />
+				<Input
+					inputStyle={styles.inputStyle}
+					label={'Password'}
+					autoCapitalize={'none'}
+					autoCorrect={false}
+					secureTextEntry
+					value={password}
+					onChangeText={setPassword}
+					onSubmitEditing={handleAuth}
+				/>
+				<Spacer />
+				<Button
+					title={isSignUp ? 'Sign-Up' : 'Login'}
+					onPress={handleAuth}
+					disabled={!email || !password}
+					buttonStyle={{
+						backgroundColor: !email || !password ? '#444' : '#cc1a1a',
+						borderRadius: 8,
+						paddingVertical: 12,
+					}}
+					titleStyle={{
+						color: '#fff',
+						fontWeight: 'bold',
+						fontSize: 16,
+					}}
+				/>
+				<Spacer />
+				<Pressable onPress={handleSwitchLoginState}>
+					<Text style={styles.switchButtonStyle}>{isSignUp ? 'Login' : 'Sign-Up'}</Text>
+				</Pressable>
+				<Spacer />
+				<ErrorText message={errorText} />
+			</ThemedView>
+		</ParallaxScrollView>
+	)
 }
 
 const styles = StyleSheet.create({

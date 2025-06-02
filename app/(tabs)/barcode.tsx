@@ -22,6 +22,7 @@ import { addProduct, getLists, handleAPIRequest } from '@/api/db'
 import { ListObject } from '@/types'
 import globalStyles from '@/styles/global'
 import { IMAGES } from '@/constants/images'
+import { ROUTES } from '@/constants/routes'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const scannerSound = require('../../assets/sounds/scanner-beep.mp3')
@@ -47,7 +48,6 @@ export default function BarcodeScreen() {
 	// Re-fetch Re-render trigger for the screen.
 	useEffect(() => {
 		if (!reload) return
-
 		;(async () => {
 			startTimedBusy()
 			const getListResponse = await handleAPIRequest({
@@ -154,9 +154,7 @@ export default function BarcodeScreen() {
 					<ThemedText type="title">Wella Product Scanner</ThemedText>
 				</ThemedView>
 				<ThemedView style={styles.stepContainer}>
-					<ThemedText type="subtitle">
-						{'Please allow camera permissions to app in order to continue.'}
-					</ThemedText>
+					<ThemedText type="subtitle">{'Please allow camera permissions to app in order to continue.'}</ThemedText>
 				</ThemedView>
 				<ThemedView style={styles.stepContainer}>
 					<Button title={'grant permission'} onPress={requestPermission} />
@@ -183,7 +181,7 @@ export default function BarcodeScreen() {
 						onScanNext={() => resetState()}
 						onViewList={() => {
 							if (selectedList) {
-								router.push(`/list/${selectedList._id}`)
+								router.push(ROUTES.LIST_DETAIL(selectedList._id))
 							}
 						}}
 					/>

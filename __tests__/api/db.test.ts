@@ -1,18 +1,8 @@
 import axios, { AxiosResponse } from 'axios'
 import MockAdapter from 'axios-mock-adapter'
-import dbAPI, {
-	signUp,
-	signIn,
-	getLists,
-	addList,
-	deleteList,
-	addProduct,
-	adjustProductQuantity,
-	deleteProduct,
-	getAPIError,
-	handleAPIRequest
-} from '@/api/db'
+import dbAPI, { signUp, signIn, getLists, addList, deleteList, addProduct, adjustProductQuantity, deleteProduct, getAPIError, handleAPIRequest } from '@/api/db'
 import { Router } from 'expo-router'
+import { ROUTES } from '@/constants/routes'
 
 jest.mock('@/context/auth/authSync', () => {
 	const mockSetAuthState = jest.fn()
@@ -134,14 +124,26 @@ describe('API methods', () => {
 		const mockSetFn = getContextAuthHandlers().setAuthFn as jest.Mock
 
 		let resolver!: () => void
-		const refreshPromise = new Promise<void>((resolve) => { resolver = resolve })
+		const refreshPromise = new Promise<void>((resolve) => {
+			resolver = resolve
+		})
 
 		getAuthState
 			.mockReturnValueOnce({ token: 'expired-token', refreshToken: 'refresh-token' })
 			.mockReturnValue({ token: 'new-token', refreshToken: 'new-refresh' })
 
 		mock.onGet('/queued').replyOnce(401)
-		mock.onPost('/auth/refreshtoken').reply(() => refreshPromise.then(() => [200, { data: { token: 'new-token', refreshToken: 'new-refresh' } }]))
+		mock.onPost('/auth/refreshtoken').reply(() =>
+			refreshPromise.then(() => [
+				200,
+				{
+					data: {
+						token: 'new-token',
+						refreshToken: 'new-refresh',
+					},
+				},
+			]),
+		)
 		mock.onGet('/queued').reply(200, { ok: true })
 
 		const req1 = dbAPI.get('/queued')
@@ -184,9 +186,13 @@ describe('handleAPIRequest', () => {
 			isAxiosError: true,
 			response: { status: 401, data: { message: 'Unauthorized' } },
 		}
-		const result = await handleAPIRequest({ request: () => Promise.reject(axiosError), onErrorMessage: spy, router })
+		const result = await handleAPIRequest({
+			request: () => Promise.reject(axiosError),
+			onErrorMessage: spy,
+			router,
+		})
 		expect(spy).toHaveBeenCalledWith('Unauthorized')
-		expect(router.replace).toHaveBeenCalledWith('/login')
+		expect(router.replace).toHaveBeenCalledWith(ROUTES.LOGIN)
 		expect(result).toBeNull()
 	})
 

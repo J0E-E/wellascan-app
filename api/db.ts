@@ -2,13 +2,13 @@ import axios, { AxiosResponse, HttpStatusCode } from 'axios'
 import { useRouter } from 'expo-router'
 
 import { clearAuthState, getAuthState, getContextAuthHandlers, setAuthState } from '@/context/auth/authSync'
+import { ROUTES } from '@/constants/routes'
 
 const { setAuthFn, unsetAuthFn } = getContextAuthHandlers()
 
 const dbAPI = axios.create({
-	baseURL: 'https://cb9f-2603-9000-d801-849b-18c8-4588-4741-3f9e.ngrok-free.app',
+	baseURL: 'https://8250-2603-9000-d801-849b-e86f-455e-1fc4-f0e9.ngrok-free.app',
 })
-
 
 let isRefreshing = false
 let failedQueue: (() => void)[] = []
@@ -18,82 +18,84 @@ dbAPI.interceptors.request.use((config) => {
 
 	if (auth?.token) {
 		if (config.headers && typeof (config.headers as any).set === 'function') {
-			(config.headers as any).set('Authorization', `Bearer ${auth.token}`)
+			;(config.headers as any).set('Authorization', `Bearer ${auth.token}`)
 		} else if (typeof config.headers === 'object') {
-			(config.headers as Record<string, string>)['Authorization'] = `Bearer ${auth.token}`
+			;(config.headers as Record<string, string>)['Authorization'] = `Bearer ${auth.token}`
 		}
 	}
 
 	return config
 })
 
-dbAPI.interceptors.response.use((response) => response, async (error) => {
-	const originalRequest = error.config
+dbAPI.interceptors.response.use(
+	(response) => response,
+	async (error) => {
+		const originalRequest = error.config
 
-	if (error.response?.status === 401 && !originalRequest._retry) {
-		originalRequest._retry = true
+		if (error.response?.status === 401 && !originalRequest._retry) {
+			originalRequest._retry = true
 
-		const currentAuth = getAuthState()
-		if (!currentAuth?.refreshToken) {
-			unsetAuthFn?.()
-			clearAuthState()
-			return Promise.reject(error)
-		}
-
-		if (!isRefreshing) {
-			isRefreshing = true
-			try {
-				const response = await dbAPI.post('/auth/refreshtoken', {
-					refreshToken: currentAuth.refreshToken,
-				})
-
-				const newTokens = response.data.data
-				setAuthFn?.({ token: newTokens.token, refreshToken: newTokens.refreshToken })
-				setAuthState({ token: newTokens.token, refreshToken: newTokens.refreshToken })
-
-				isRefreshing = false
-				failedQueue.forEach((callback) => callback())
-				failedQueue = []
-
-				return dbAPI(originalRequest)
-			} catch (error) {
-				isRefreshing = false
-				failedQueue = []
+			const currentAuth = getAuthState()
+			if (!currentAuth?.refreshToken) {
 				unsetAuthFn?.()
 				clearAuthState()
 				return Promise.reject(error)
 			}
+
+			if (!isRefreshing) {
+				isRefreshing = true
+				try {
+					const response = await dbAPI.post('/auth/refreshtoken', {
+						refreshToken: currentAuth.refreshToken,
+					})
+
+					const newTokens = response.data.data
+					setAuthFn?.({ token: newTokens.token, refreshToken: newTokens.refreshToken })
+					setAuthState({ token: newTokens.token, refreshToken: newTokens.refreshToken })
+
+					isRefreshing = false
+					failedQueue.forEach((callback) => callback())
+					failedQueue = []
+
+					return dbAPI(originalRequest)
+				} catch (error) {
+					isRefreshing = false
+					failedQueue = []
+					unsetAuthFn?.()
+					clearAuthState()
+					return Promise.reject(error)
+				}
+			}
+
+			return new Promise((resolve) => {
+				failedQueue.push(() => resolve(dbAPI(originalRequest)))
+			})
 		}
 
-		return new Promise((resolve) => {
-			failedQueue.push(() => resolve(dbAPI(originalRequest)))
-		})
-	}
+		return Promise.reject(error)
+	},
+)
 
-	return Promise.reject(error)
-})
+export const signUp = async (options: { email: string; password: string }) => await dbAPI.post('auth/signup', options)
 
-export const signUp = async (options: { email: string; password: string }) =>
-	await dbAPI.post('auth/signup', options)
+export const signIn = async (options: { email: string; password: string }) => await dbAPI.post('auth/signin', options)
 
-export const signIn = async (options: { email: string; password: string }) =>
-	await dbAPI.post('auth/signin', options)
+export const getLists = async (id?: string) => await dbAPI.get(`reorder/list/${id || ''}`)
 
-export const getLists = async (id?: string) =>
-	await dbAPI.get(`reorder/list/${id || ''}`)
+export const addList = async (name: string) => await dbAPI.post('reorder/list/', { name })
 
-export const addList = async (name: string) =>
-	await dbAPI.post('reorder/list/', { name })
-
-export const deleteList = async (id: string) =>
-	await dbAPI.delete(`reorder/list/${id}`)
+export const deleteList = async (id: string) => await dbAPI.delete(`reorder/list/${id}`)
 
 export const addProduct = async (listId: string, sku: string, name: string, quantity: number = 1) =>
 	await dbAPI.post(`reorder/product/${listId}`, { sku, name, quantity })
 
 type AdjustQuantityParams =
 	| { id: string; type: 'increase' | 'decrease' }
-	| { id: string; type: 'set'; quantity: number }
+	| {
+			id: string
+			type: 'set'
+			quantity: number
+	  }
 
 export const adjustProductQuantity = async (params: AdjustQuantityParams) => {
 	if (params.type === 'set') {
@@ -137,8 +139,7 @@ export type APIHandlerOptions<T> = {
 	router?: ReturnType<typeof useRouter>
 }
 
-export const handleAPIRequest = async <T>({ request, onErrorMessage, router }: APIHandlerOptions<AxiosResponse<T>>)
-	: Promise<T | null> => {
+export const handleAPIRequest = async <T>({ request, onErrorMessage, router }: APIHandlerOptions<AxiosResponse<T>>): Promise<T | null> => {
 	try {
 		onErrorMessage?.('')
 		const response = await request()
@@ -148,7 +149,7 @@ export const handleAPIRequest = async <T>({ request, onErrorMessage, router }: A
 		if (parsed.shouldLogOut) {
 			unsetAuthFn?.()
 			clearAuthState()
-			router?.replace('/login')
+			router?.replace(ROUTES.LOGIN)
 		}
 		onErrorMessage?.(parsed.message)
 		return null

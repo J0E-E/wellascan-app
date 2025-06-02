@@ -14,8 +14,9 @@ import { useBusy } from '@/hooks/useBusy'
 import { ListObject, ProductObject } from '@/types'
 import wellaAPI from '@/api/wella'
 import { IMAGES } from '@/constants/images'
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from 'expo-image-picker'
 import { AxiosError } from 'axios'
+import { ROUTES } from '@/constants/routes'
 
 export default function AddToCartScreen() {
 	const router = useRouter()
@@ -31,7 +32,7 @@ export default function AddToCartScreen() {
 	const [errorMessage, setErrorMessage] = useState('')
 
 	useEffect(() => {
-		(async () => {
+		;(async () => {
 			startTimedBusy()
 			const getListResponse = await handleAPIRequest({
 				request: getLists,
@@ -49,7 +50,7 @@ export default function AddToCartScreen() {
 			const foundList = lists.find((list: ListObject) => list._id === id)
 			if (!foundList) return
 
-			(async () => {
+			;(async () => {
 				startTimedBusy()
 				const getListResponse = await handleAPIRequest({
 					request: () => getLists(foundList._id),
@@ -124,9 +125,9 @@ export default function AddToCartScreen() {
 						headers: {
 							Authorization: `Bearer ${qr}`,
 							Cookie: 'ROUTE=.api-75fbd89c5-ldw5n',
-							'Content-Type': 'application/json'
-						}
-					}
+							'Content-Type': 'application/json',
+						},
+					},
 				)
 
 				if (addResponse.status !== 200) {
@@ -156,24 +157,26 @@ export default function AddToCartScreen() {
 			setErrorMessage('Could not delete list.')
 		} finally {
 			stopBusy()
-			router.replace('/lists')
+			router.replace(ROUTES.LISTS)
 		}
 	}
 
 	if (!permission) return <View />
 
 	if (!permission.granted) {
-		return <View>
-			<ThemedView style={styles.titleContainer}>
-				<ThemedText type="title">Wella Product Uploader</ThemedText>
-			</ThemedView>
-			<ThemedView style={styles.stepContainer}>
-				<ThemedText type="subtitle">Please allow camera permissions to app in order to continue.</ThemedText>
-			</ThemedView>
-			<ThemedView style={styles.stepContainer}>
-				<Button title={'grant permission'} onPress={requestPermission} />
-			</ThemedView>
-		</View>
+		return (
+			<View>
+				<ThemedView style={styles.titleContainer}>
+					<ThemedText type="title">Wella Product Uploader</ThemedText>
+				</ThemedView>
+				<ThemedView style={styles.stepContainer}>
+					<ThemedText type="subtitle">Please allow camera permissions to app in order to continue.</ThemedText>
+				</ThemedView>
+				<ThemedView style={styles.stepContainer}>
+					<Button title={'grant permission'} onPress={requestPermission} />
+				</ThemedView>
+			</View>
+		)
 	}
 
 	return (
@@ -183,11 +186,25 @@ export default function AddToCartScreen() {
 					<Image source={IMAGES.APP_LOGO} style={styles.wellaLogoLocal} />
 				</View>
 			</View>
-			<ThemedText type={'title'} style={styles.titleStyle}>Wella Product Uploader</ThemedText>
-			{errorMessage ? <ThemedText type={'default'} style={{ color: 'red', textAlign: 'center' }}>{errorMessage}</ThemedText> : null}
-			{!qr
-				? <View>
-					<ThemedText type={'subtitle'} style={styles.titleStyle}>Please scan the QR code for Wella Login Info</ThemedText>
+			<ThemedText type={'title'} style={styles.titleStyle}>
+				Wella Product Uploader
+			</ThemedText>
+			{errorMessage ? (
+				<ThemedText
+					type={'default'}
+					style={{
+						color: 'red',
+						textAlign: 'center',
+					}}
+				>
+					{errorMessage}
+				</ThemedText>
+			) : null}
+			{!qr ? (
+				<View>
+					<ThemedText type={'subtitle'} style={styles.titleStyle}>
+						Please scan the QR code for Wella Login Info
+					</ThemedText>
 					<View style={styles.cameraContainerStyle}>
 						<GestureDetector gesture={tap}>
 							<CameraView
@@ -199,20 +216,38 @@ export default function AddToCartScreen() {
 							/>
 						</GestureDetector>
 					</View>
-					<Button title="Go to Wella Site to get QR Image" onPress={() => Linking.openURL('https://us.wella.professionalstore.com/')} containerStyle={{ marginTop: 20 }} buttonStyle={styles.scanButton} />
+					<Button
+						title="Go to Wella Site to get QR Image"
+						onPress={() => Linking.openURL('https://us.wella.professionalstore.com/')}
+						containerStyle={{ marginTop: 20 }}
+						buttonStyle={styles.scanButton}
+					/>
 					<Button title="Upload QR Image" onPress={handlePickImageAndDecode} containerStyle={{ marginTop: 20 }} buttonStyle={styles.scanButton} />
 				</View>
-				: <View>
-					{!completed
-						? <View>
-							<ThemedText type={'title'} style={styles.titleStyle}>QR Code Scanned and ready.</ThemedText>
+			) : (
+				<View>
+					{!completed ? (
+						<View>
+							<ThemedText type={'title'} style={styles.titleStyle}>
+								QR Code Scanned and ready.
+							</ThemedText>
 							<Button title="Send to Wella Cart" onPress={handleSendToCart} containerStyle={{ marginTop: 50 }} buttonStyle={styles.scanButton} />
 						</View>
-						: <View>
-							<ThemedText type={'title'} style={styles.titleStyle}>Wella Cart Updated.</ThemedText>
-							<Button title="Delete List and Return" onPress={handleDeleteAndClose} containerStyle={{ marginTop: 50 }} buttonStyle={styles.scanButton} />
-						</View>}
-				</View>}
+					) : (
+						<View>
+							<ThemedText type={'title'} style={styles.titleStyle}>
+								Wella Cart Updated.
+							</ThemedText>
+							<Button
+								title="Delete List and Return"
+								onPress={handleDeleteAndClose}
+								containerStyle={{ marginTop: 50 }}
+								buttonStyle={styles.scanButton}
+							/>
+						</View>
+					)}
+				</View>
+			)}
 		</View>
 	)
 }

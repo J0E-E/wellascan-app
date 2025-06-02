@@ -13,6 +13,21 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
+  "jest": {
+    "preset": "jest-expo",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "app/**/*.{ts,tsx}",
+      "api/**/*.{ts,tsx}",
+      "constants/**/*.{ts,tsx}",
+      "context/**/*.{ts,tsx}",
+      "!**/*.d.ts",
+      "!**/__tests__/**"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|expo|expo-router|@expo|react-clone-referenced-element|@unimodules)"
+    ]
+  },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
     "@react-native-picker/picker": "2.11.0",
@@ -21,6 +36,7 @@
     "@react-navigation/native": "^7.1.6",
     "@zxing/library": "^0.21.3",
     "axios": "^1.9.0",
+    "babel-preset-react-native": "^4.0.1",
     "expo": "~53.0.9",
     "expo-audio": "~0.4.5",
     "expo-av": "~15.1.4",
@@ -39,6 +55,7 @@
     "expo-symbols": "~0.4.4",
     "expo-system-ui": "~5.0.7",
     "expo-web-browser": "~14.1.6",
+    "metro-react-native-babel-preset": "^0.77.0",
     "mongodb": "^6.16.0",
     "mongoose": "^8.15.0",
     "react": "19.0.0",
@@ -60,7 +77,9 @@
     "@babel/preset-typescript": "^7.27.1",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.27.0",
+    "@jest/globals": "^30.0.0-beta.3",
     "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/react-native": "^13.2.0",
     "@types/jest": "^29.5.14",
@@ -75,9 +94,9 @@
     "eslint-plugin-unused-imports": "^4.1.4",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^30.0.0-beta.3",
+    "jest-expo": "^53.0.5",
     "prettier": "3.5.3",
     "react-test-renderer": "^19.0.0",
-    "ts-jest": "^29.3.4",
     "typescript": "~5.8.3"
   },
   "private": true

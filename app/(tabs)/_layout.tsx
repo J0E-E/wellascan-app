@@ -8,6 +8,7 @@ import { HapticTab } from '@/components/HapticTab'
 import { Colors } from '@/constants/Colors'
 import TabBarBackground from '@/components/ui/TabBarBackground'
 import { IconSymbol } from '@/components/ui/IconSymbol'
+import { ROUTES } from '@/constants/routes'
 
 export default function ProtectedTabsLayout() {
 	const { state: authState } = useContext(AuthContext)
@@ -22,7 +23,7 @@ export default function ProtectedTabsLayout() {
 
 	useEffect(() => {
 		if (mounted && !authState.token) {
-			router.replace('/login')
+			router.replace(ROUTES.LOGIN)
 		}
 	}, [authState.token, mounted])
 
@@ -45,7 +46,8 @@ export default function ProtectedTabsLayout() {
 					ios: { position: 'absolute' },
 					default: {},
 				}),
-			}}>
+			}}
+		>
 			<Tabs.Screen
 				name="index"
 				options={{
