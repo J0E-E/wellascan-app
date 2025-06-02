@@ -19,11 +19,14 @@
     "collectCoverageFrom": [
       "app/**/*.{ts,tsx}",
       "api/**/*.{ts,tsx}",
-      "constants/**/*.{ts,tsx}",
       "context/**/*.{ts,tsx}",
+      "components/**/*.{ts,tsx}",
+      "hooks/**/*.{ts,tsx}",
       "!**/*.d.ts",
       "!**/__tests__/**",
-      "!app/**/_layout.{ts,tsx}"
+      "!app/**/_layout.{ts,tsx}",
+      "!app/+not-found.tsx",
+      "!constants/**/*.{ts,tsx}"
     ],
     "transformIgnorePatterns": [
       "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|expo|expo-router|@expo|react-clone-referenced-element|@unimodules)"

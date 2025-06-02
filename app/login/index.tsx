@@ -80,6 +80,7 @@ export default function LoginScreen() {
 				<ThemedText type={'title'}>{isSignUp ? 'Sign-Up' : 'Login'}</ThemedText>
 				<Spacer />
 				<Input
+					testID={'emailInput'}
 					inputStyle={styles.inputStyle}
 					label={'Email'}
 					autoCapitalize={'none'}
@@ -90,6 +91,7 @@ export default function LoginScreen() {
 				/>
 				<Spacer />
 				<Input
+					testID={'passwordInput'}
 					inputStyle={styles.inputStyle}
 					label={'Password'}
 					autoCapitalize={'none'}
@@ -100,24 +102,32 @@ export default function LoginScreen() {
 					onSubmitEditing={handleAuth}
 				/>
 				<Spacer />
-				<Button
-					title={isSignUp ? 'Sign-Up' : 'Login'}
+				<Pressable
 					onPress={handleAuth}
-					disabled={!email || !password}
-					buttonStyle={{
-						backgroundColor: !email || !password ? '#444' : '#cc1a1a',
+					testID={'submitButton'}
+					style={{
+						backgroundColor: '#cc1a1a',
 						borderRadius: 8,
 						paddingVertical: 12,
 					}}
-					titleStyle={{
-						color: '#fff',
-						fontWeight: 'bold',
-						fontSize: 16,
-					}}
-				/>
+				>
+					<Text
+						style={{
+							color: '#ffffff',
+							fontWeight: 'bold',
+							fontSize: 16,
+							textAlign: 'center',
+						}}
+						testID={'submitButtonText'}
+					>
+						{isSignUp ? 'Sign-Up' : 'Login'}
+					</Text>
+				</Pressable>
 				<Spacer />
-				<Pressable onPress={handleSwitchLoginState}>
-					<Text style={styles.switchButtonStyle}>{isSignUp ? 'Login' : 'Sign-Up'}</Text>
+				<Pressable onPress={handleSwitchLoginState} testID={'switchStateButton'}>
+					<Text style={styles.switchButtonStyle} testID={'switchStateButtonText'}>
+						{isSignUp ? 'Login' : 'Sign-Up'}
+					</Text>
 				</Pressable>
 				<Spacer />
 				<ErrorText message={errorText} />
