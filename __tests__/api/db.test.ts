@@ -3,6 +3,7 @@ import MockAdapter from 'axios-mock-adapter'
 import dbAPI, { signUp, signIn, getLists, addList, deleteList, addProduct, adjustProductQuantity, deleteProduct, getAPIError, handleAPIRequest } from '@/api/db'
 import { Router } from 'expo-router'
 import { ROUTES } from '@/constants/routes'
+import { __testHooks } from '@/api/db'
 
 jest.mock('@/context/auth/authSync', () => {
 	const mockSetAuthState = jest.fn()
@@ -107,32 +108,39 @@ describe('API methods', () => {
 
 	it('returns early if no refresh token on 401', async () => {
 		const { getAuthState, getContextAuthHandlers, clearAuthState } = require('@/context/auth/authSync')
+
+		getAuthState.mockReturnValue({ token: 'token', refreshToken: null })
+
 		const mockUnset = getContextAuthHandlers().unsetAuthFn as jest.Mock
 		const mockClear = clearAuthState as jest.Mock
 
-		getAuthState.mockReturnValueOnce({ token: 'old-token', refreshToken: null })
+		mock.onGet('/test401').reply(401)
 
-		mock.onGet('/norefresh').reply(401)
-		await expect(dbAPI.get('/norefresh')).rejects.toThrow()
+		await expect(dbAPI.get('/test401')).rejects.toThrow()
+
 		expect(mockUnset).toHaveBeenCalled()
 		expect(mockClear).toHaveBeenCalled()
 	})
 
-	it('queues requests while token is refreshing', async () => {
+	it('queues additional requests while token is refreshing', async () => {
 		const { getAuthState, setAuthState, getContextAuthHandlers } = require('@/context/auth/authSync')
+
 		const mockSet = setAuthState as jest.Mock
 		const mockSetFn = getContextAuthHandlers().setAuthFn as jest.Mock
 
-		let resolver!: () => void
+		let resolveRefresh!: () => void
 		const refreshPromise = new Promise<void>((resolve) => {
-			resolver = resolve
+			resolveRefresh = resolve
 		})
 
 		getAuthState
-			.mockReturnValueOnce({ token: 'expired-token', refreshToken: 'refresh-token' })
-			.mockReturnValue({ token: 'new-token', refreshToken: 'new-refresh' })
+			.mockReturnValueOnce({
+				token: 'expired-token',
+				refreshToken: 'refresh-token',
+			}) // 1st call for first request
+			.mockReturnValue({ token: 'new-token', refreshToken: 'new-refresh' }) // all future calls
 
-		mock.onGet('/queued').replyOnce(401)
+		mock.onGet('/queue-test').replyOnce(401)
 		mock.onPost('/auth/refreshtoken').reply(() =>
 			refreshPromise.then(() => [
 				200,
@@ -144,16 +152,105 @@ describe('API methods', () => {
 				},
 			]),
 		)
-		mock.onGet('/queued').reply(200, { ok: true })
+		mock.onGet('/queue-test').reply(200, { ok: true })
 
-		const req1 = dbAPI.get('/queued')
-		const req2 = dbAPI.get('/queued')
+		// Start the first request to initiate refresh
+		const req1 = dbAPI.get('/queue-test')
 
-		resolver()
-		await Promise.all([req1.catch(() => {}), req2])
+		// While refresh is in progress, issue another request — it should get queued
+		const req2 = dbAPI.get('/queue-test')
 
+		// Now resolve the token refresh
+		resolveRefresh()
+
+		const [res1, res2] = await Promise.all([req1, req2])
+
+		expect(res1.data).toEqual({ ok: true })
+		expect(res2.data).toEqual({ ok: true })
 		expect(mockSet).toHaveBeenCalledWith({ token: 'new-token', refreshToken: 'new-refresh' })
 		expect(mockSetFn).toHaveBeenCalledWith({ token: 'new-token', refreshToken: 'new-refresh' })
+	})
+
+	it('retries original request after successful token refresh', async () => {
+		const { getAuthState, setAuthState, getContextAuthHandlers } = require('@/context/auth/authSync')
+
+		const mockSet = setAuthState as jest.Mock
+		const mockSetFn = getContextAuthHandlers().setAuthFn as jest.Mock
+
+		getAuthState
+			.mockReturnValueOnce({ token: 'expired-token', refreshToken: 'refresh-token' })
+			.mockReturnValue({ token: 'new-token', refreshToken: 'new-refresh' })
+
+		mock.onGet('/retrytest').replyOnce(401)
+		mock.onPost('/auth/refreshtoken').replyOnce(200, {
+			data: {
+				token: 'new-token',
+				refreshToken: 'new-refresh',
+			},
+		})
+		mock.onGet('/retrytest').replyOnce(200, { success: true })
+
+		const response = await dbAPI.get('/retrytest')
+
+		expect(response.data).toEqual({ success: true })
+		expect(mockSet).toHaveBeenCalledWith({ token: 'new-token', refreshToken: 'new-refresh' })
+		expect(mockSetFn).toHaveBeenCalledWith({ token: 'new-token', refreshToken: 'new-refresh' })
+	})
+
+	it('clears auth state if token refresh fails', async () => {
+		const { getAuthState, clearAuthState, getContextAuthHandlers } = require('@/context/auth/authSync')
+
+		const mockUnset = getContextAuthHandlers().unsetAuthFn as jest.Mock
+		const mockClear = clearAuthState as jest.Mock
+
+		getAuthState.mockReturnValue({ token: 'expired-token', refreshToken: 'bad-refresh' })
+
+		mock.onGet('/shouldfail').replyOnce(401)
+		mock.onPost('/auth/refreshtoken').replyOnce(500)
+
+		await expect(dbAPI.get('/shouldfail')).rejects.toBeDefined()
+
+		expect(mockUnset).toHaveBeenCalled()
+		expect(mockClear).toHaveBeenCalled()
+	})
+})
+
+describe('API interceptor queue logic', () => {
+	beforeEach(() => {
+		mock.reset()
+		__testHooks.setIsRefreshing(false)
+		__testHooks.flushQueue()
+	})
+
+	it('pushes a request to the queue when isRefreshing is true', async () => {
+		const { getAuthState } = require('@/context/auth/authSync')
+
+		getAuthState.mockReturnValue({
+			token: 'expired-token',
+			refreshToken: 'refresh-token',
+		})
+
+		// First call responds with 401 (so it triggers the interceptor retry logic)
+		mock.onGet('/queued-path').replyOnce(401)
+
+		// Second call (retry) returns 200 after token refresh
+		mock.onGet('/queued-path').reply(200, { ok: true })
+
+		// Keep isRefreshing true to queue the request instead of refreshing
+		__testHooks.setIsRefreshing(true)
+
+		const req = dbAPI.get('/queued-path')
+
+		// Wait a tick to allow request to enter queue
+		await new Promise((res) => setImmediate(res))
+
+		// Now simulate the refresh completing
+		__testHooks.setIsRefreshing(false)
+		__testHooks.flushQueue()
+
+		const res = await req
+
+		expect(res.data).toEqual({ ok: true })
 	})
 })
 

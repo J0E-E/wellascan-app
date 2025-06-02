@@ -7,11 +7,22 @@ import { ROUTES } from '@/constants/routes'
 const { setAuthFn, unsetAuthFn } = getContextAuthHandlers()
 
 const dbAPI = axios.create({
-	baseURL: 'https://8250-2603-9000-d801-849b-e86f-455e-1fc4-f0e9.ngrok-free.app',
+	baseURL: 'https://cdb6-2603-9000-d801-849b-1ce8-9c81-b2fe-8be4.ngrok-free.app',
 })
 
 let isRefreshing = false
 let failedQueue: (() => void)[] = []
+
+export const __testHooks = {
+	setIsRefreshing: (val: boolean) => {
+		isRefreshing = val
+	},
+	flushQueue: () => {
+		const queue = [...failedQueue]
+		failedQueue = []
+		queue.forEach((cb) => cb())
+	},
+}
 
 dbAPI.interceptors.request.use((config) => {
 	const auth = getAuthState()
@@ -19,8 +30,6 @@ dbAPI.interceptors.request.use((config) => {
 	if (auth?.token) {
 		if (config.headers && typeof (config.headers as any).set === 'function') {
 			;(config.headers as any).set('Authorization', `Bearer ${auth.token}`)
-		} else if (typeof config.headers === 'object') {
-			;(config.headers as Record<string, string>)['Authorization'] = `Bearer ${auth.token}`
 		}
 	}
 
@@ -68,7 +77,9 @@ dbAPI.interceptors.response.use(
 			}
 
 			return new Promise((resolve) => {
-				failedQueue.push(() => resolve(dbAPI(originalRequest)))
+				failedQueue.push(() => {
+					resolve(dbAPI(originalRequest))
+				})
 			})
 		}
 

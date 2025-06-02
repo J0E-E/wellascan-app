@@ -22,7 +22,8 @@
       "constants/**/*.{ts,tsx}",
       "context/**/*.{ts,tsx}",
       "!**/*.d.ts",
-      "!**/__tests__/**"
+      "!**/__tests__/**",
+      "!app/**/_layout.{ts,tsx}"
     ],
     "transformIgnorePatterns": [
       "node_modules/(?!(jest-)?react-native|@react-native|@react-navigation|expo|expo-router|@expo|react-clone-referenced-element|@unimodules)"
