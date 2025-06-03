@@ -33,8 +33,9 @@ export default function ListComponent({ listItem, setReload, setErrorText }: Lis
 	}
 
 	return (
-		<View style={styles.containerStyle}>
+		<View style={styles.containerStyle} testID={`listComponent-${listItem._id}`}>
 			<Pressable
+				testID={`listComponentPressable-${listItem._id}`}
 				style={styles.detailContainerStyle}
 				onPress={() => {
 					router.setParams({ listName: listItem.name })

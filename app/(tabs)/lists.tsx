@@ -91,6 +91,7 @@ export default function ListsScreen() {
 				</View>
 				<View style={styles.inputRow}>
 					<Input
+						testID={'newListInput'}
 						placeholder="Add New List"
 						autoCapitalize="words"
 						value={name}
@@ -100,7 +101,7 @@ export default function ListsScreen() {
 						inputStyle={styles.input}
 						containerStyle={styles.inputContainer}
 					/>
-					<Button title="+" onPress={handleCreateListClick} buttonStyle={styles.addButton} />
+					<Button title="+" onPress={handleCreateListClick} buttonStyle={styles.addButton} testID={'createListButton'} />
 				</View>
 				<ErrorText message={errorText} />
 			</View>
@@ -108,9 +109,7 @@ export default function ListsScreen() {
 				style={styles.flatListContainerStyle}
 				data={lists}
 				keyExtractor={(list: ListObject) => list._id || list.name}
-				renderItem={({ item }) => (
-					<ListComponent listItem={item} setReload={setReload} setErrorText={setErrorText} />
-				)}
+				renderItem={({ item }) => <ListComponent listItem={item} setReload={setReload} setErrorText={setErrorText} />}
 				contentContainerStyle={styles.flatListContentContainerStyle}
 				ListEmptyComponent={<ThemedText type={'title'}>No lists found.</ThemedText>}
 			/>

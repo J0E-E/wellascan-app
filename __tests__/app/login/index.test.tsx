@@ -5,11 +5,11 @@ import { AuthContext } from '@/context/auth/AuthContext'
 import * as db from '@/api/db'
 import { useRouter } from 'expo-router'
 import { BusyProvider } from '@/context/busy/BusyContext'
-import { within } from '@testing-library/dom'
 
 jest.mock('expo-router', () => ({
 	useRouter: jest.fn(),
 }))
+
 jest.mock('@/api/db')
 
 describe('LoginScreen', () => {

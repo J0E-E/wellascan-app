@@ -13,6 +13,7 @@ import { getLists, handleAPIRequest } from '@/api/db'
 
 import { ProductObject } from '@/types'
 import { ROUTES } from '@/constants/routes'
+import ErrorText from '@/components/ui/ErrorText'
 
 export default function ListScreen() {
 	const color = useThemeColor({ light: 'black', dark: 'white' }, 'text')
@@ -66,11 +67,7 @@ export default function ListScreen() {
 					<IconSymbol size={20} name="pencil" color={color} />
 				</Pressable>
 			</View>
-			{errorMessage ? (
-				<ThemedText style={styles.errorMessage} type="default">
-					{errorMessage}
-				</ThemedText>
-			) : null}
+			{errorMessage ? <ErrorText message={errorMessage} /> : null}
 			<View style={styles.productsContainer}>
 				<FlatList
 					data={products}
