@@ -1,0 +1,204 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeScreen renders and matches snapshot (safe subset) 1`] = `
+<View>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#fff",
+        },
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 8,
+        },
+      ]
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "#11181C",
+          },
+          undefined,
+          {
+            "fontSize": 32,
+            "fontWeight": "bold",
+            "lineHeight": 32,
+          },
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+        ]
+      }
+    >
+      Welcome to the Wella App!
+    </Text>
+  </View>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#fff",
+        },
+        {
+          "gap": 8,
+          "marginBottom": 8,
+        },
+      ]
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "#11181C",
+          },
+          undefined,
+          undefined,
+          undefined,
+          {
+            "fontSize": 20,
+            "fontWeight": "bold",
+          },
+          undefined,
+          undefined,
+        ]
+      }
+    >
+      Step 1: Create a List
+    </Text>
+    <Text
+      style={
+        [
+          {
+            "color": "#11181C",
+          },
+          {
+            "fontSize": 16,
+            "lineHeight": 24,
+          },
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+        ]
+      }
+    >
+      Go to the Lists tab and create at least one list. This is where your scanned products will go.
+    </Text>
+  </View>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#fff",
+        },
+        {
+          "gap": 8,
+          "marginBottom": 8,
+        },
+      ]
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "#11181C",
+          },
+          undefined,
+          undefined,
+          undefined,
+          {
+            "fontSize": 20,
+            "fontWeight": "bold",
+          },
+          undefined,
+          undefined,
+        ]
+      }
+    >
+      Step 2: Select Your List
+    </Text>
+    <Text
+      style={
+        [
+          {
+            "color": "#11181C",
+          },
+          {
+            "fontSize": 16,
+            "lineHeight": 24,
+          },
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+        ]
+      }
+    >
+      Open the list and tap "Scan Products to List" — or go to the Barcode tab and pick a list to start scanning into.
+    </Text>
+  </View>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#fff",
+        },
+        {
+          "gap": 8,
+          "marginBottom": 8,
+        },
+      ]
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "#11181C",
+          },
+          undefined,
+          undefined,
+          undefined,
+          {
+            "fontSize": 20,
+            "fontWeight": "bold",
+          },
+          undefined,
+          undefined,
+        ]
+      }
+    >
+      Step 3: Start Scanning!
+    </Text>
+    <Text
+      style={
+        [
+          {
+            "color": "#11181C",
+          },
+          {
+            "fontSize": 16,
+            "lineHeight": 24,
+          },
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+        ]
+      }
+    >
+      Scan Wella products as you use them to keep your reorder list up to date.
+    </Text>
+  </View>
+</View>
+`;
