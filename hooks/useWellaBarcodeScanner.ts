@@ -1,0 +1,1 @@
+//TODO: build a hook here to handle sku, product, success/errorMessage, reset useBarcodeScanner()

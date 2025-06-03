@@ -2,9 +2,8 @@ import { StyleSheet, View } from 'react-native'
 import { Button } from 'react-native-elements'
 import { useAudioPlayer } from 'expo-audio'
 import { Image } from 'expo-image'
-import { CameraView, useCameraPermissions } from 'expo-camera'
+import { useCameraPermissions } from 'expo-camera'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router'
 import { ThemedText } from '@/components/ThemedText'
@@ -14,7 +13,6 @@ import ScanResultCard from '@/components/barcode/ScanResultCard'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 
 import { useBusy } from '@/hooks/useBusy'
-import { useAutofocus } from '@/hooks/useAutoFocus'
 
 import wellaAPI from '@/api/wella'
 import { addProduct, getLists, handleAPIRequest } from '@/api/db'
@@ -23,6 +21,7 @@ import { ListObject } from '@/types'
 import globalStyles from '@/styles/global'
 import { IMAGES } from '@/constants/images'
 import { ROUTES } from '@/constants/routes'
+import BarcodeCamera from '@/components/barcode/BarcodeCamera'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const scannerSound = require('../../assets/sounds/scanner-beep.mp3')
@@ -33,7 +32,6 @@ export default function BarcodeScreen() {
 	const { startTimedBusy, stopBusy } = useBusy()
 	const [permission, requestPermission] = useCameraPermissions()
 	const scannerSoundPlayer = useAudioPlayer(scannerSound)
-	const { isRefreshing, onTap } = useAutofocus()
 	const prevListId = useRef<string | undefined>(undefined)
 
 	const [sku, setSku] = useState<string>('')
@@ -42,8 +40,6 @@ export default function BarcodeScreen() {
 	const [selectedList, setSelectedList] = useState<ListObject | undefined>()
 	const [reload, setReload] = useState(true)
 	const [lists, setLists] = useState<ListObject[]>([])
-
-	const tap = Gesture.Tap().onBegin(onTap).runOnJS(true)
 
 	// Re-fetch Re-render trigger for the screen.
 	useEffect(() => {
@@ -190,22 +186,13 @@ export default function BarcodeScreen() {
 						<ThemedText style={styles.noListSelectedStyle}>PLEASE SELECT A LIST TO CONTINUE</ThemedText>
 					</>
 				) : (
-					<>
-						<GestureDetector gesture={tap}>
-							<CameraView
-								style={styles.camera}
-								facing={'back'}
-								autofocus={isRefreshing ? 'off' : 'on'}
-								barcodeScannerSettings={{
-									barcodeTypes: ['upc_a'],
-								}}
-								onBarcodeScanned={(scanningResult) => {
-									scannerSoundPlayer.play()
-									setSku(scanningResult.data)
-								}}
-							/>
-						</GestureDetector>
-					</>
+					<BarcodeCamera
+						barcodeType={'upc_a'}
+						onScan={(data) => {
+							scannerSoundPlayer.play()
+							setSku(data)
+						}}
+					/>
 				)}
 			</View>
 		</ParallaxScrollView>
@@ -222,10 +209,6 @@ const styles = StyleSheet.create({
 	stepContainer: {
 		gap: 8,
 		marginBottom: 8,
-	},
-	camera: {
-		height: 400,
-		flex: 1,
 	},
 	barcodeScreenContainer: {
 		flexDirection: 'column',
