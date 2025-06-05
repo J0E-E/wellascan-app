@@ -1,5 +1,5 @@
 import { Image } from 'expo-image'
-import { Input, Button } from 'react-native-elements'
+import { Input } from 'react-native-elements'
 import { StyleSheet, Pressable, Text } from 'react-native'
 import { useContext, useEffect, useState } from 'react'
 import { useRouter } from 'expo-router'

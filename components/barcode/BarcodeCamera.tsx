@@ -4,7 +4,6 @@ import { StyleSheet } from 'react-native'
 import { useAutofocus } from '@/hooks/useAutoFocus'
 import { useAudioPlayer } from 'expo-audio'
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const scannerSound = require('../../assets/sounds/scanner-beep.mp3')
 
 export default function BarcodeCamera({ barcodeType, onScan }: { barcodeType: 'upc_a' | 'qr'; onScan: (data: string) => void }) {
