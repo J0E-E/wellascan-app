@@ -1,28 +1,28 @@
 import { ThemedText } from '../ThemedText'
 import { Button } from 'react-native-elements'
 import { StyleSheet, View } from 'react-native'
+import { WellaProductObject } from '@/hooks/useWellaBarcodeScanner'
 
 type ScanResultCardProps = {
-	sku: string
-	product: string
+	product: WellaProductObject
 	message: string
 	onScanNext: () => void
 	onViewList: () => void
 }
 
-export default function ScanResultCard({ sku, product, message, onScanNext, onViewList }: ScanResultCardProps) {
+export default function ScanResultCard({ product, message, onScanNext, onViewList }: ScanResultCardProps) {
 	return (
 		<View style={styles.card}>
 			<View style={styles.textContainer}>
 				<ThemedText type="subtitle" style={styles.label}>
 					SKU:
 				</ThemedText>
-				<ThemedText style={styles.value}>{sku}</ThemedText>
+				<ThemedText style={styles.value}>{product.ean}</ThemedText>
 
 				<ThemedText type="subtitle" style={styles.label}>
 					Product:
 				</ThemedText>
-				<ThemedText style={styles.value}>{product || 'No product found with that SKU'}</ThemedText>
+				<ThemedText style={styles.value}>{product.name || 'No product found with that SKU'}</ThemedText>
 
 				<ThemedText type="subtitle" style={styles.label}>
 					Status:

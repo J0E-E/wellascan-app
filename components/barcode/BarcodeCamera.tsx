@@ -1,11 +1,17 @@
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-import { BarcodeScanningResult, CameraView } from 'expo-camera'
+import { CameraView } from 'expo-camera'
 import { StyleSheet } from 'react-native'
 import { useAutofocus } from '@/hooks/useAutoFocus'
+import { useAudioPlayer } from 'expo-audio'
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const scannerSound = require('../../assets/sounds/scanner-beep.mp3')
 
 export default function BarcodeCamera({ barcodeType, onScan }: { barcodeType: 'upc_a' | 'qr'; onScan: (data: string) => void }) {
+	const scannerSoundPlayer = useAudioPlayer(scannerSound)
 	const { isRefreshing, onTap } = useAutofocus()
 	const tap = Gesture.Tap().onBegin(onTap).runOnJS(true)
+
 	return (
 		<GestureDetector gesture={tap}>
 			<CameraView
@@ -16,7 +22,11 @@ export default function BarcodeCamera({ barcodeType, onScan }: { barcodeType: 'u
 					barcodeTypes: [barcodeType],
 				}}
 				onBarcodeScanned={(scanningResult) => {
+					scannerSoundPlayer.play()
 					onScan(scanningResult.data)
+					setTimeout(() => {
+						scannerSoundPlayer.seekTo(0)
+					}, 1000)
 				}}
 			/>
 		</GestureDetector>

@@ -2,10 +2,10 @@ import { Dropdown } from 'react-native-element-dropdown'
 import { StyleSheet, Text, View } from 'react-native'
 import { ListObject } from '@/types'
 
-interface ListDropdownProps {
+type ListDropdownProps = {
 	lists: ListObject[]
-	selectedList: ListObject | undefined
-	onChange: (item: any) => void
+	selectedList: ListObject | null
+	onChange: (list: ListObject) => void
 }
 
 export default function ListDropdown({ lists, selectedList, onChange }: ListDropdownProps) {
@@ -22,7 +22,7 @@ export default function ListDropdown({ lists, selectedList, onChange }: ListDrop
 				selectedTextStyle={styles.selectedTextStyle}
 				activeColor={'#cc1a1a'}
 				data={lists}
-				onChange={(item) => onChange(item)}
+				onChange={(list) => onChange(list)}
 				value={selectedList}
 				labelField={'name'}
 				valueField={'_id'}

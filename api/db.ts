@@ -7,7 +7,7 @@ import { ROUTES } from '@/constants/routes'
 const { setAuthFn, unsetAuthFn } = getContextAuthHandlers()
 
 const dbAPI = axios.create({
-	baseURL: 'https://0921-2603-9000-d801-849b-838-df76-ae67-576b.ngrok-free.app',
+	baseURL: 'https://6b58-2603-9000-d801-849b-98a1-8ce-9386-968d.ngrok-free.app',
 })
 
 let isRefreshing = false
