@@ -60,6 +60,13 @@ export default [
 			],
 		},
 	},
-
+	{
+		files: ['app.config.js'],
+		languageOptions: {
+			globals: {
+				process: 'readonly',
+			},
+		},
+	},
 	prettier,
 ]

@@ -1,5 +1,6 @@
 import axios, { AxiosResponse, HttpStatusCode } from 'axios'
 import { useRouter } from 'expo-router'
+import Constants from 'expo-constants'
 
 import { clearAuthState, getAuthState, getContextAuthHandlers, setAuthState } from '@/context/auth/authSync'
 import { ROUTES } from '@/constants/routes'
@@ -7,7 +8,7 @@ import { ROUTES } from '@/constants/routes'
 const { setAuthFn, unsetAuthFn } = getContextAuthHandlers()
 
 const dbAPI = axios.create({
-	baseURL: 'https://6b58-2603-9000-d801-849b-98a1-8ce-9386-968d.ngrok-free.app',
+	baseURL: Constants.expoConfig?.extra?.API_BASE_URL,
 })
 
 let isRefreshing = false
